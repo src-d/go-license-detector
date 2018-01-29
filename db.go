@@ -44,7 +44,7 @@ func (db *LicenseDatabase) Load() {
 		if len(header.Name) <= 6 {
 			continue
 		}
-		key := header.Name[2:len(header.Name)-4]
+		key := header.Name[2 : len(header.Name)-4]
 		text := make([]byte, header.Size)
 		readSize, readErr := archive.Read(text)
 		if readErr != nil {

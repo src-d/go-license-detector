@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	NoLicenseFoundError   = errors.New("no license file was found")
+	NoLicenseFoundError = errors.New("no license file was found")
 
 	globalLicenseDatabase = &LicenseDatabase{}
 	// Base names of guessable license files.
@@ -32,8 +32,8 @@ var (
 		".txt",
 	}
 
-	filePreprocessors = map[string]func(string)string {
-		".md": PreprocessMarkdown,
+	filePreprocessors = map[string]func(string) string{
+		".md":  PreprocessMarkdown,
 		".rst": PreprocessRestructuredText,
 	}
 
