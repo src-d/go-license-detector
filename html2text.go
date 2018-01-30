@@ -13,11 +13,11 @@ var (
 	badLinkHrefRE = regexp.MustCompile(`#|javascript:`)
 	headerRE      = regexp.MustCompile("/h[2-6]")
 	fakeTagRE     = regexp.MustCompile("[^a-zA-Z0-9/]")
-	fakeTags      = map[string]bool {
-		"program": true,
-		"year": true,
+	fakeTags      = map[string]bool{
+		"program":   true,
+		"year":      true,
 		"copyright": true,
-		"author": true,
+		"author":    true,
 	}
 )
 
@@ -259,7 +259,7 @@ func HTML2Text(html string) string {
 				badTagStackDepth--
 			}
 			if (fakeTagRE.MatchString(tagName) || fakeTags[tagName]) &&
-					strings.Index(tagName, "=") < 0 && tagName[0] != '/' {
+				strings.Index(tagName, "=") < 0 && tagName[0] != '/' {
 				outBuf.WriteString("<" + tagName + ">")
 			}
 			continue

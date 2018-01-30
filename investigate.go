@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	paths "path"
 	"regexp"
 	"strings"
-	"os"
 )
 
 var (
@@ -35,8 +35,8 @@ var (
 	}
 
 	filePreprocessors = map[string]func(string) string{
-		".md":  PreprocessMarkdown,
-		".rst": PreprocessRestructuredText,
+		".md":   PreprocessMarkdown,
+		".rst":  PreprocessRestructuredText,
 		".html": PreprocessHtml,
 	}
 
