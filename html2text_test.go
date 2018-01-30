@@ -1,4 +1,4 @@
-package licenseng
+package ld
 
 import "testing"
 import . "github.com/smartystreets/goconvey/convey"

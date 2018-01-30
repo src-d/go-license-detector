@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/vmarkovtsev/licenseng"
 	"os"
 	"sort"
+
+	"gopkg.in/src-d/go-license-detector.v1"
 )
 
 func main() {
@@ -12,7 +13,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Usage: licenseng <path>")
 		os.Exit(1)
 	}
-	licenses, err := licenseng.InvestigateProjectLicenses(os.Args[1])
+	licenses, err := ld.InvestigateProjectLicenses(os.Args[1])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)

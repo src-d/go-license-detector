@@ -1,24 +1,26 @@
-# licenseng
+# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/src-d/go-license-detector.v1?status.svg)](http://godoc.org/gopkg.in/src-d/go-license-detector.v1) [![Build Status](https://travis-ci.org/src-d/go-license-detector.svg?branch=master)](https://travis-ci.org/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
 
-Project license detector. It scans the given directory for license files, reads them and outputs
-all findings in the standardized way ([SPDX](https://spdx.org/licenses/)). Acts as either
-a command line application or a library.
+Project license detector - a command line application or a library, written in Go.
+It scans the given directory for license files, normalizes and hashes them and outputs
+all found fuzzy matches with the list of reference texts.
+The returned names follow [SPDX](https://spdx.org/licenses/) standard.
 
 Why? There are no similar projects exist which can be compiled into a native binary without
-dependencies. The implementation is also fast and sophisticated.
+dependencies and also supports the whole SPDX license database (≈400 items).
+The implementation is also fast and the API is easy to use.
 
 The license texts are taken directly from [license-list-data](https://github.com/spdx/license-list-data)
-SPDX project, thus ≈400 licenses are handled. The detection is fuzzy and is not template matching;
-in other words, this project does not provide any legal guarantees. The intended area of usage is
-data mining.
+repository. The detection algorithm is **not template matching**;
+this directly implies that go-license-detector does not provide any legal guarantees.
+The intended area of it's usage is data mining.
 
 ## Installation
 
 ```
-go get -v -d github.com/vmarkovtsev/licenseng/...
-cd $GOPATH/src/github.com/vmarkovtsev/licenseng
+go get -v -d gopkg.in/src-d/go-license-detector.v1/...
+cd $GOPATH/src/gopkg.in/src-d/go-license-detector.v1
 make dependencies
-go get -v github.com/vmarkovtsev/licenseng/...
+go get -v gopkg.in/src-d/go-license-detector.v1/...
 ```
 
 ## Contributions
@@ -32,7 +34,7 @@ Apache 2.0, see [LICENSE.md](LICENSE.md).
 ## Algorithm
 
 1. Find files in the root directory which may represent a license. E.g. `LICENSE` or `license.md`.
-2. If the file is Markdown or reStructuredText, render to HTML and then convert to plain text.
+2. If the file is Markdown or reStructuredText, render to HTML and then convert to plain text. Original HTML files are also converted.
 3. Normalize the text according to [SPDX recommendations](https://spdx.org/spdx-license-list/matching-guidelines).
 4. Split the text into unigrams and build the weighted bag of words.
 5. Calculate [Weighted MinHash](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36928.pdf).
@@ -55,9 +57,9 @@ licenseng /path/to/project
 Library:
 
 ```go
-import "github.com/vmarkovtsev/licenseng"
+import "gopkg.in/src-d/go-license-detector.v1"
 
 func main() {
-	licenses, err := licenseng.InvestigateProjectLicenses("/path/to/project")
+	licenses, err := ld.InvestigateProjectLicenses("/path/to/project")
 }
 ```
