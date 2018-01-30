@@ -16,11 +16,11 @@ var (
 	punctuationRe = regexp.MustCompile("[-‒–—―⁓⸺⸻~˗‐‑⁃⁻₋−∼⎯⏤─➖𐆑֊﹘﹣－]+")
 	// 5.1.3 Quotes  Any variation of quotations (single, double, curly, etc.) should be considered
 	// equivalent.
-	quotesRe = regexp.MustCompile("[\"'“”‘’„‚«»‹›❛❜❝❞]+")
+	quotesRe = regexp.MustCompile("[\"'“”‘’„‚«»‹›❛❜❝❞`]+")
 	// 7.1.1 Where a line starts with a bullet, number, letter, or some form of a list item
 	// (determined where list item is followed by a space, then the text of the sentence), ignore
 	// the list item for matching purposes.
-	bulletRe = regexp.MustCompile("(?m)^(([-*✱﹡•●⚫⏺🞄∙⋅])|([(\\[{]?\\d+[.)\\]} ] ?)|([(\\[{]?[a-z][.)\\]}] ?)|([(\\[{]?i+[.)\\]} ] ?))")
+	bulletRe = regexp.MustCompile("(?m)^(([-*✱﹡•●⚫⏺🞄∙⋅])|([(\\[{]?\\d+[.)\\]}] ?)|([(\\[{]?[a-z][.)\\]}] ?)|([(\\[{]?i+[.)\\]} ] ?))")
 	// 8.1.1 The words in the following columns are considered equivalent and interchangeable.
 	wordReplacer = strings.NewReplacer(
 		"acknowledgment", "acknowledgement",
@@ -69,13 +69,15 @@ var (
 
 	// 9.1.1 "©", "(c)", or "Copyright" should be considered equivalent and interchangeable.
 	copyrightRe = regexp.MustCompile("©|\\(c\\)|copyright")
+	trademarkRe = regexp.MustCompile("™|\\(tm\\)|trademark")
 
+	// extra cleanup
 	brokenLinkRe = regexp.MustCompile("http s ://")
-	urlCleanup   = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
+	urlCleanupRe = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
 )
 
 // https://spdx.org/spdx-license-list/matching-guidelines
-func NormalizeLicenseText(text string) string {
+func NormalizeLicenseText(text string, strict bool) string {
 	// Line endings
 	text = lineEndingsRe.ReplaceAllString(text, "\n")
 
@@ -99,9 +101,18 @@ func NormalizeLicenseText(text string) string {
 
 	// 9. Copyright Symbol
 	text = copyrightRe.ReplaceAllString(text, "©")
+	text = trademarkRe.ReplaceAllString(text, "™")
 
+	// fix broken URLs in SPDX source texts
 	text = brokenLinkRe.ReplaceAllString(text, "https://")
-	text = urlCleanup.ReplaceAllString(text, "$1")
+
+	// fix URLs in <> - erase the decoration
+	text = urlCleanupRe.ReplaceAllString(text, "$1")
+
+	if !strict {
+		// there are common mismatches because of trailing dots
+		text = strings.Replace(text, ".", "", -1)
+	}
 
 	return text
 }

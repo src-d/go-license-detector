@@ -7,6 +7,7 @@ import (
 	paths "path"
 	"regexp"
 	"strings"
+	"os"
 )
 
 var (
@@ -29,12 +30,14 @@ var (
 		"",
 		".md",
 		".rst",
+		".html",
 		".txt",
 	}
 
 	filePreprocessors = map[string]func(string) string{
 		".md":  PreprocessMarkdown,
 		".rst": PreprocessRestructuredText,
+		".html": PreprocessHtml,
 	}
 
 	fileRe = regexp.MustCompile(
@@ -83,4 +86,7 @@ func InvestigateFileLicense(text string) (options []string, similarities []float
 
 func init() {
 	globalLicenseDatabase.Load()
+	if os.Getenv("LICENSENG_DEBUG") != "" {
+		globalLicenseDatabase.Debug = true
+	}
 }

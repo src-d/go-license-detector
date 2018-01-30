@@ -21,3 +21,7 @@ func PreprocessRestructuredText(text string) string {
 	// Repeat to times to heal broken HTML
 	return HTML2Text(HTML2Text(output.String()))
 }
+
+func PreprocessHtml(text string) string {
+	return HTML2Text(HTML2Text(text))
+}

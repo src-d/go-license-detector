@@ -23,7 +23,8 @@ type LicenseDatabase struct {
 }
 
 const (
-	numHashes = 100
+	numHashes              = 100
+	lshSimilarityThreshold = 0.9
 )
 
 func (db LicenseDatabase) Length() int {
@@ -55,7 +56,7 @@ func (db *LicenseDatabase) Load() {
 		if int64(readSize) != header.Size {
 			panic("failed to load licenses.tar from the assets: " + header.Name + ": incomplete read")
 		}
-		db.licenseTexts[key] = NormalizeLicenseText(string(text))
+		db.licenseTexts[key] = NormalizeLicenseText(string(text), false)
 	}
 	tokenFreqs := map[string]map[string]int{}
 	for key, text := range db.licenseTexts {
@@ -90,7 +91,7 @@ func (db *LicenseDatabase) Load() {
 		db.tokens[token] = i
 		db.docfreqs[i] = docfreqs[token]
 	}
-	db.lsh = minhashlsh.NewMinhashLSH64(numHashes, 0.9)
+	db.lsh = minhashlsh.NewMinhashLSH64(numHashes, lshSimilarityThreshold)
 	db.hasher = NewWeightedMinHasher(len(uniqueTokens), numHashes, 7)
 	for key, tokens := range tokenFreqs {
 		indices := make([]int, len(tokens))
@@ -109,16 +110,17 @@ func (db *LicenseDatabase) Load() {
 }
 
 func (db *LicenseDatabase) Query(text string) (options []string, similarities []float32) {
-	normalized := NormalizeLicenseText(text)
+	normalized := NormalizeLicenseText(text, false)
 	tokens := map[int]int{}
 	myRunes := make([]rune, 0, len(normalized)/6)
+	oovRune := rune(len(db.tokens))
 	for _, line := range strings.Split(normalized, "\n") {
 		for _, token := range strings.Split(line, " ") {
 			if index, exists := db.tokens[token]; exists {
 				tokens[index]++
 				myRunes = append(myRunes, rune(index))
-			} else {
-				myRunes = append(myRunes, rune(len(db.tokens)))
+			} else if len(myRunes) == 0 || myRunes[len(myRunes)-1] != oovRune {
+				myRunes = append(myRunes, oovRune)
 			}
 		}
 	}

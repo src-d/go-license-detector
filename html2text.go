@@ -3,6 +3,7 @@ package licenseng
 import (
 	"bytes"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -11,12 +12,25 @@ var (
 	linkTagRE     = regexp.MustCompile(`a.*href=('([^']*?)'|"([^"]*?)")`)
 	badLinkHrefRE = regexp.MustCompile(`#|javascript:`)
 	headerRE      = regexp.MustCompile("/h[2-6]")
-	fakeTagRE     = regexp.MustCompile("[^a-zA-Z0-9]")
+	fakeTagRE     = regexp.MustCompile("[^a-zA-Z0-9/]")
+	fakeTags      = map[string]bool {
+		"program": true,
+		"year": true,
+		"copyright": true,
+		"author": true,
+	}
 )
 
 func parseHTMLEntity(entName string) (string, bool) {
 	entName = strings.ToLower(entName)
 
+	if strings.HasPrefix(entName, "#") {
+		val, err := strconv.Atoi(entName[1:])
+		if err != nil {
+			return "", false
+		}
+		return string(rune(val)), true
+	}
 	// possible entities
 	switch entName {
 	case "nbsp":
@@ -47,8 +61,44 @@ func parseHTMLEntity(entName string) (string, bool) {
 		return "\"", true
 	case "rdquo":
 		return "\"", true
+	case "lsquo":
+		return "'", true
 	case "rsquo":
 		return "'", true
+	case "sbquo":
+		return "\"", true
+	case "rbquo":
+		return "\"", true
+	case "bdquo":
+		return "\"", true
+	case "ndash":
+		return "-", true
+	case "mdash":
+		return "-", true
+	case "bull":
+		return "*", true
+	case "hellip":
+		return "...", true
+	case "prime":
+		return "'", true
+	case "lsaquo":
+		return "'", true
+	case "rsaquo":
+		return "'", true
+	case "trade":
+		return "™", true
+	case "minus":
+		return "-", true
+	case "raquo":
+		return "\"", true
+	case "laquo":
+		return "\"", true
+	case "deg":
+		return "°", true
+	case "sect":
+		return "*", true
+	case "iexcl":
+		return "¡", true
 	default:
 		return "", false
 	}
@@ -208,7 +258,8 @@ func HTML2Text(html string) string {
 				// end of unwanted block
 				badTagStackDepth--
 			}
-			if fakeTagRE.MatchString(tagName) && strings.Index(tagName, " href=") < 0 && tagName[0] != '/' {
+			if (fakeTagRE.MatchString(tagName) || fakeTags[tagName]) &&
+					strings.Index(tagName, "=") < 0 && tagName[0] != '/' {
 				outBuf.WriteString("<" + tagName + ">")
 			}
 			continue
