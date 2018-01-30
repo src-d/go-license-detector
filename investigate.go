@@ -51,25 +51,42 @@ func InvestigateProjectLicenses(path string) (map[string]float32, error) {
 	if err != nil {
 		return nil, err
 	}
+	fileNames := []string{}
+	for _, file := range files {
+		if !file.IsDir() {
+			fileNames = append(fileNames, file.Name())
+		}
+	}
+	candidates := ExtractLicenseFiles(fileNames, func(file string) (string, error) {
+		text, err := ioutil.ReadFile(paths.Join(path, file))
+		return string(text), err
+	})
+	if len(candidates) == 0 {
+		return nil, NoLicenseFoundError
+	}
+	return InvestigateFiles(candidates), nil
+}
+
+func ExtractLicenseFiles(files []string, reader func(string) (string, error)) []string {
 	candidates := []string{}
 	for _, file := range files {
-		if !file.IsDir() && fileRe.MatchString(strings.ToLower(file.Name())) {
-			textBytes, err := ioutil.ReadFile(paths.Join(path, file.Name()))
+		if fileRe.MatchString(strings.ToLower(file)) {
+			text, err := reader(file)
 			if err == nil {
-				text := string(textBytes)
-				if preprocessor, exists := filePreprocessors[paths.Ext(file.Name())]; exists {
+				if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
 					text = preprocessor(text)
 				}
 				candidates = append(candidates, text)
 			}
 		}
 	}
-	if len(candidates) == 0 {
-		return nil, NoLicenseFoundError
-	}
+	return candidates
+}
+
+func InvestigateFiles(texts []string) map[string]float32 {
 	maxLicenses := map[string]float32{}
-	for _, text := range candidates {
-		options, similarities := InvestigateFileLicense(text)
+	for _, text := range texts {
+		options, similarities := InvestigateFile(text)
 		for i, sim := range similarities {
 			maxSim := maxLicenses[options[i]]
 			if sim > maxSim {
@@ -77,10 +94,10 @@ func InvestigateProjectLicenses(path string) (map[string]float32, error) {
 			}
 		}
 	}
-	return maxLicenses, nil
+	return maxLicenses
 }
 
-func InvestigateFileLicense(text string) (options []string, similarities []float32) {
+func InvestigateFile(text string) (options []string, similarities []float32) {
 	return globalLicenseDatabase.Query(text)
 }
 
