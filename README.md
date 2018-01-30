@@ -18,9 +18,12 @@ The intended area of it's usage is data mining.
 
 ```
 go get -v -d gopkg.in/src-d/go-license-detector.v1/...
-cd $GOPATH/src/gopkg.in/src-d/go-license-detector.v1
+```
+
+## Regenerate binary data
+
+```
 make dependencies
-go get -v gopkg.in/src-d/go-license-detector.v1/...
 ```
 
 ## Contributions
