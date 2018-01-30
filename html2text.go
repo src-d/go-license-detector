@@ -6,9 +6,13 @@ import (
 	"strings"
 )
 
-var badTagnamesRE = regexp.MustCompile(`^(head|script|style|a)($|\s*)`)
-var linkTagRE = regexp.MustCompile(`a.*href=('([^']*?)'|"([^"]*?)")`)
-var badLinkHrefRE = regexp.MustCompile(`#|javascript:`)
+var (
+	badTagnamesRE = regexp.MustCompile(`^(head|script|style|a)($|\s*)`)
+	linkTagRE     = regexp.MustCompile(`a.*href=('([^']*?)'|"([^"]*?)")`)
+	badLinkHrefRE = regexp.MustCompile(`#|javascript:`)
+	headerRE      = regexp.MustCompile("/h[2-6]")
+	fakeTagRE     = regexp.MustCompile("[^a-zA-Z0-9]")
+)
 
 func parseHTMLEntity(entName string) (string, bool) {
 	entName = strings.ToLower(entName)
@@ -120,7 +124,10 @@ func HTML2Text(html string) string {
 		}
 
 		switch {
-		case r <= 0xD, r == 0x85, r == 0x2028, r == 0x2029: // new lines
+		case r < '\n', r > '\n' && r < 0x20:
+			continue
+
+		case r == '\n', r == 0x85, r == 0x2028, r == 0x2029: // new lines
 			outBuf.WriteString("\n")
 			continue
 
@@ -175,6 +182,11 @@ func HTML2Text(html string) string {
 					outBuf.WriteString("\r\n")
 				}
 				canPrintNewline = false
+			} else if headerRE.MatchString(tagName) {
+				// end header with a dot
+				if html[tagStart-2] != '.' {
+					outBuf.WriteRune('.')
+				}
 			} else if badTagnamesRE.MatchString(tagName) {
 				// unwanted block
 				badTagStackDepth++
@@ -195,6 +207,9 @@ func HTML2Text(html string) string {
 				badTagnamesRE.MatchString(tagName[1:]) {
 				// end of unwanted block
 				badTagStackDepth--
+			}
+			if fakeTagRE.MatchString(tagName) && strings.Index(tagName, " href=") < 0 && tagName[0] != '/' {
+				outBuf.WriteString("<" + tagName + ">")
 			}
 			continue
 

@@ -9,7 +9,8 @@ import (
 
 func PreprocessMarkdown(text string) string {
 	html := blackfriday.Run([]byte(text))
-	return HTML2Text(string(html))
+	// Repeat to times to heal broken HTML
+	return HTML2Text(HTML2Text(string(html)))
 }
 
 func PreprocessRestructuredText(text string) string {
@@ -17,5 +18,6 @@ func PreprocessRestructuredText(text string) string {
 	input := bytes.NewBufferString(text)
 	output := &bytes.Buffer{}
 	parser.ReStructuredText(input, rst.ToHTML(output))
-	return HTML2Text(output.String())
+	// Repeat to times to heal broken HTML
+	return HTML2Text(HTML2Text(output.String()))
 }

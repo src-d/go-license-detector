@@ -8,9 +8,9 @@ import (
 var (
 	lineEndingsRe = regexp.MustCompile("\\r\\n?")
 	// 3.1.1 All whitespace should be treated as a single blank space.
-	whitespaceRe         = regexp.MustCompile("\\s+")
-	trailingWhitespaceRe = regexp.MustCompile("(?m)\\s$")
-	leadingWhitespaceRe  = regexp.MustCompile("(?m)^\\s")
+	whitespaceRe         = regexp.MustCompile("[\\t\\f\\r              　​]+")
+	trailingWhitespaceRe = regexp.MustCompile("(?m)[\\t\\f\\r              　​]$")
+	leadingWhitespaceRe  = regexp.MustCompile("(?m)^[\\t\\f\\r              　​]")
 	// 5.1.2 Hyphens, Dashes  Any hyphen, dash, en dash, em dash, or other variation should be
 	// considered equivalent.
 	punctuationRe = regexp.MustCompile("[-‒–—―⁓⸺⸻~˗‐‑⁃⁻₋−∼⎯⏤─➖𐆑֊﹘﹣－]+")
@@ -20,7 +20,7 @@ var (
 	// 7.1.1 Where a line starts with a bullet, number, letter, or some form of a list item
 	// (determined where list item is followed by a space, then the text of the sentence), ignore
 	// the list item for matching purposes.
-	bulletRe = regexp.MustCompile("(?m)^(([-*✱﹡•●⚫⏺🞄∙⋅])|(\\d+(\\.|\\)| ))|([a-z](\\.|\\)| ))|(i+(\\.|\\)| )))")
+	bulletRe = regexp.MustCompile("(?m)^(([-*✱﹡•●⚫⏺🞄∙⋅])|([(\\[{]?\\d+[.)\\]} ] ?)|([(\\[{]?[a-z][.)\\]}] ?)|([(\\[{]?i+[.)\\]} ] ?))")
 	// 8.1.1 The words in the following columns are considered equivalent and interchangeable.
 	wordReplacer = strings.NewReplacer(
 		"acknowledgment", "acknowledgement",
@@ -69,6 +69,9 @@ var (
 
 	// 9.1.1 "©", "(c)", or "Copyright" should be considered equivalent and interchangeable.
 	copyrightRe = regexp.MustCompile("©|\\(c\\)|copyright")
+
+	brokenLinkRe = regexp.MustCompile("http s ://")
+	urlCleanup   = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
 )
 
 // https://spdx.org/spdx-license-list/matching-guidelines
@@ -96,6 +99,9 @@ func NormalizeLicenseText(text string) string {
 
 	// 9. Copyright Symbol
 	text = copyrightRe.ReplaceAllString(text, "©")
+
+	text = brokenLinkRe.ReplaceAllString(text, "https://")
+	text = urlCleanup.ReplaceAllString(text, "$1")
 
 	return text
 }

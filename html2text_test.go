@@ -21,7 +21,7 @@ func TestHTML2Text(t *testing.T) {
 		})
 
 		Convey("Line breaks", func() {
-			So(HTML2Text("should \nignore \r\nnew lines"), ShouldEqual, "should ignore new lines")
+			So(HTML2Text("should not \nignore \r\nnew lines"), ShouldEqual, "should not \nignore \nnew lines")
 			So(HTML2Text(`two<br>line<br/>breaks`), ShouldEqual, "two\r\nline\r\nbreaks")
 			So(HTML2Text(`<p>two</p><p>paragraphs</p>`), ShouldEqual, "two\r\nparagraphs")
 		})
@@ -34,6 +34,13 @@ func TestHTML2Text(t *testing.T) {
 				ShouldEqual, "would you pay in ¢, £, ¥ or €?")
 			So(HTML2Text(`Tom & Jerry is not an entity`), ShouldEqual, "Tom & Jerry is not an entity")
 			So(HTML2Text(`this &neither; as you see`), ShouldEqual, "this &neither; as you see")
+			So(HTML2Text(`version 2.0, january 2004
+&lt;http://www.apache.org/licenses/&gt;
+
+`), ShouldEqual, `version 2.0, january 2004
+<http://www.apache.org/licenses/>
+
+`)
 		})
 
 		Convey("Full HTML structure", func() {

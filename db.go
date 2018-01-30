@@ -13,6 +13,8 @@ import (
 )
 
 type LicenseDatabase struct {
+	Debug bool
+
 	licenseTexts map[string]string
 	tokens       map[string]int
 	docfreqs     []int
@@ -147,6 +149,16 @@ func (db *LicenseDatabase) Query(text string) (options []string, similarities []
 		}
 		dmp := diffmatchpatch.New()
 		diff := dmp.DiffMainRunes(myRunes, yourRunes, false)
+
+		if db.Debug {
+			tokarr := make([]string, len(db.tokens)+1)
+			for key, val := range db.tokens {
+				tokarr[val] = key
+			}
+			tokarr[len(db.tokens)] = "!"
+			println(dmp.DiffPrettyText(dmp.DiffCharsToLines(diff, tokarr)))
+		}
+
 		distance := dmp.DiffLevenshtein(diff)
 		options = append(options, key)
 		similarities = append(similarities, float32(1)-float32(distance)/float32(len(myRunes)))
