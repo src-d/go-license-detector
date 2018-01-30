@@ -20,12 +20,6 @@ The intended area of it's usage is data mining.
 go get -v -d gopkg.in/src-d/go-license-detector.v1/...
 ```
 
-## Regenerate binary data
-
-```
-make dependencies
-```
-
 ## Contributions
 
 ...are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md) and [code of conduct](CODE_OF_CONDUCT.md).
@@ -66,3 +60,11 @@ func main() {
 	licenses, err := ld.InvestigateProjectLicenses("/path/to/project")
 }
 ```
+
+## Regenerate binary data
+
+The SPDX licenses are included into the binary. To update them, run
+```
+make bindata.go
+```
+
