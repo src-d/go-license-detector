@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-licenseng project is [Apache licensed](LICENSE.md) and accepts
+go-license-detector project is [Apache licensed](LICENSE.md) and accepts
 contributions via GitHub pull requests.  This document outlines some of the
 conventions on development workflow, commit message formatting, contact points,
 and other resources to make it easier to get your contribution accepted.
@@ -22,7 +22,7 @@ This can be done easily using the [`-s`](https://github.com/git/git/blob/b2c150d
 
 The official support channels, for both users and contributors, are:
 
-- GitHub [issues](https://github.com/src-d/licenseng/issues)*
+- GitHub [issues](https://github.com/src-d/go-license-detector/issues)*
 - Slack: #machine-learning room in the [source{d} Slack](https://join.slack.com/t/sourced-community/shared_invite/enQtMjc4Njk5MzEyNzM2LTFjNzY4NjEwZGEwMzRiNTM4MzRlMzQ4MmIzZjkwZmZlM2NjODUxZmJjNDI1OTcxNDAyMmZlNmFjODZlNTg0YWM)
 
 *Before opening a new issue or submitting a new pull request, it's helpful to
@@ -32,7 +32,7 @@ issue you're facing, or it's a known issue that we're already aware of.
 
 ## How to Contribute
 
-Pull Requests (PRs) are the main and exclusive way to contribute to the official licenseng project.
+Pull Requests (PRs) are the main and exclusive way to contribute to the official go-license-detector project.
 In order for a PR to be accepted it needs to pass a list of requirements:
 
 - All PRs must be written in idiomatic Go, formatted according to [gofmt](https://golang.org/cmd/gofmt/), and without any warnings from [go lint](https://github.com/golang/lint) nor [go vet](https://golang.org/cmd/vet/).
