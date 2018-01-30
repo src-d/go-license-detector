@@ -51,7 +51,7 @@ the reference licenses.
 Command line:
 
 ```bash
-licenseng /path/to/project
+license-detector /path/to/project
 ```
 
 Library:
