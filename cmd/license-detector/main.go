@@ -20,7 +20,7 @@ func main() {
 	}
 	licenseStrs := make([]string, 0, len(licenses))
 	for key, val := range licenses {
-		licenseStrs = append(licenseStrs, fmt.Sprintf("%-20s\t%.1f%%", key, val*100))
+		licenseStrs = append(licenseStrs, fmt.Sprintf("%.1f%%\t%s", val*100, key))
 	}
 	sort.Sort(sort.Reverse(sort.StringSlice(licenseStrs)))
 	for _, s := range licenseStrs {
