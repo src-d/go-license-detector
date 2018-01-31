@@ -102,8 +102,8 @@ func InvestigateFile(text string) (options []string, similarities []float32) {
 }
 
 func init() {
-	globalLicenseDatabase.Load()
 	if os.Getenv("LICENSENG_DEBUG") != "" {
 		globalLicenseDatabase.Debug = true
 	}
+	globalLicenseDatabase.Load()
 }
