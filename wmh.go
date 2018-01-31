@@ -17,7 +17,7 @@ type WeightedMinHasher struct {
 
 func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHasher {
 	randSrc := rand.New(rand.NewSource(uint64(seed)))
-	gammaGen := distuv.Gamma{Alpha: 2, Beta: 2, Src: randSrc}
+	gammaGen := distuv.Gamma{Alpha: 2, Beta: 1, Src: randSrc}
 	hasher := &WeightedMinHasher{dim: dim, sampleSize: sampleSize}
 	hasher.rs = make([][]float32, sampleSize)
 	for y := 0; y < sampleSize; y++ {
@@ -50,20 +50,19 @@ func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHashe
 func (wmh *WeightedMinHasher) Hash(values []float32, indices []int) []uint64 {
 	hashvalues := make([]uint64, wmh.sampleSize)
 	for s := 0; s < wmh.sampleSize; s++ {
-		k := -1
 		minLnA := math.MaxFloat64
+		var k int
 		var minT float64
 		for vi, j := range indices {
 			if j >= wmh.dim {
 				panic("index is out of range")
 			}
-			v := values[vi]
-			vlog := math.Log(float64(v))
+			vlog := math.Log(float64(values[vi]))
 			// t = np.floor((vlog / self.rs[i]) + self.betas[i])
 			t := math.Floor(vlog/float64(wmh.rs[s][j])) + float64(wmh.betas[s][j])
 			// ln_y = (t - self.betas[i]) * self.rs[i]
 			lnY := (t - float64(wmh.betas[s][j])) * float64(wmh.rs[s][j])
-			// ln_a = self.lnCs[i] - ln_y - self.rs[i]
+			// ln_a = self.ln_cs[i] - ln_y - self.rs[i]
 			lnA := float64(wmh.lnCs[s][j]) - lnY - float64(wmh.rs[s][j])
 			// k = np.nanargmin(ln_a)
 			if lnA < minLnA {

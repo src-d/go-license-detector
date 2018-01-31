@@ -23,7 +23,7 @@ type LicenseDatabase struct {
 }
 
 const (
-	numHashes              = 90
+	numHashes              = 100
 	lshSimilarityThreshold = 0.75
 )
 
