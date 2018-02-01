@@ -2,14 +2,15 @@ version: "{build}"
 platform: x64
 image: Visual Studio 2017
 
-clone_folder: c:\gopath\src\github.com\src-d\go-license-detector.v1
+clone_folder: c:\gopath\src\gopkg.in\src-d\go-license-detector.v1
 
 environment:
   GOPATH: c:\gopath
 
 build_script:
-  - go get -v github.com/src-d/go-license-detector.v1/cmd/license-detector
-  - 7z a c:\gopath\src\github.com\src-d\go-license-detector.v1\license-detector.windows_amd64.zip %GOPATH%\bin\license-detector.exe
+  - go version
+  - go get -v gopkg.in/src-d/go-license-detector.v1/cmd/license-detector
+  - 7z a c:\gopath\src\gopkg.in\src-d\go-license-detector.v1\license-detector.windows_amd64.zip %GOPATH%\bin\license-detector.exe
 
 artifacts:
   - name: license-detector.windows_amd64.zip

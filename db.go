@@ -12,13 +12,20 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
+// LicenseDatabase holds the license texts, their hashes and the hashtables to query for nearest
+// neighbors.
 type LicenseDatabase struct {
 	Debug bool
 
+	// license name -> text
 	licenseTexts map[string]string
+	// unique unigrams -> index
 	tokens       map[string]int
+	// document frequencies of the unigrams, indexes match with `tokens`
 	docfreqs     []int
+	// Weighted MinHash hashtables
 	lsh          *minhashlsh.MinhashLSH
+	// turns a license text into a hash
 	hasher       *WeightedMinHasher
 }
 
@@ -27,14 +34,18 @@ const (
 	lshSimilarityThreshold = 0.75
 )
 
+// Length returns the number of registered licenses.
 func (db LicenseDatabase) Length() int {
 	return len(db.licenseTexts)
 }
 
+// VocabularySize returns the number of unique unigrams.
 func (db LicenseDatabase) VocabularySize() int {
 	return len(db.tokens)
 }
 
+// Load takes the licenses from the embedded storage, normalizes, hashes them and builds the
+// LSH hashtables.
 func (db *LicenseDatabase) Load() {
 	tarBytes, err := Asset("licenses.tar")
 	if err != nil {
@@ -113,6 +124,7 @@ func (db *LicenseDatabase) Load() {
 	db.lsh.Index()
 }
 
+// Query returns the most similar registered licenses.
 func (db *LicenseDatabase) Query(text string) (options []string, similarities []float32) {
 	normalized := NormalizeLicenseText(text, false)
 	if db.Debug {
