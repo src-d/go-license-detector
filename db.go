@@ -180,11 +180,42 @@ func (db *LicenseDatabase) Query(text string) (options []string, similarities []
 			println(dmp.DiffPrettyText(dmp.DiffCharsToLines(diff, tokarr)))
 		}
 
-		distance := dmp.DiffLevenshtein(diff)
+		// TODO(vmarkovtsev): replace with dmp.DiffLevenshtein when this PR is merged:
+		// https://github.com/sergi/go-diff/pull/90
+		distance := diffLevenshtein(diff)
 		options = append(options, key)
 		similarities = append(similarities, float32(1)-float32(distance)/float32(len(myRunes)))
 	}
 	return
+}
+
+func diffLevenshtein(diffs []diffmatchpatch.Diff) int {
+	levenshtein := 0
+	insertions := 0
+	deletions := 0
+	max := func (a, b int) int {
+		if a < b {
+			return b
+		}
+		return a
+	}
+
+	for _, aDiff := range diffs {
+		switch aDiff.Type {
+		case diffmatchpatch.DiffInsert:
+			insertions += len(aDiff.Text)
+		case diffmatchpatch.DiffDelete:
+			deletions += len(aDiff.Text)
+		case diffmatchpatch.DiffEqual:
+			// A deletion and an insertion is one substitution.
+			levenshtein += max(insertions, deletions)
+			insertions = 0
+			deletions = 0
+		}
+	}
+
+	levenshtein += max(insertions, deletions)
+	return levenshtein
 }
 
 func tfidf(freq int, docfreq int, ndocs int) float32 {
