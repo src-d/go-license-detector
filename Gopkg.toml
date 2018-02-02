@@ -34,12 +34,12 @@
   name = "github.com/hhatto/gorst"
 
 [[constraint]]
-  name = "github.com/sergi/go-diff"
-  version = "1.0.0"
+  name = "github.com/jdkato/prose"
+  version = "1.1.0"
 
 [[constraint]]
-  name = "github.com/smartystreets/goconvey"
-  version = "1.6.3"
+  name = "github.com/sergi/go-diff"
+  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -51,11 +51,19 @@
 
 [[constraint]]
   branch = "master"
+  name = "golang.org/x/net"
+
+[[constraint]]
+  branch = "master"
   name = "gonum.org/v1/gonum"
 
 [[constraint]]
   name = "gopkg.in/russross/blackfriday.v2"
   version = "2.0.0"
+
+[[constraint]]
+  name = "gopkg.in/src-d/go-git.v4"
+  version = "4.1.0"
 
 [prune]
   go-tests = true
