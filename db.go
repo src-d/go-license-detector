@@ -27,6 +27,15 @@ type LicenseDatabase struct {
 	lsh          *minhashlsh.MinhashLSH
 	// turns a license text into a hash
 	hasher       *WeightedMinHasher
+	// part of license name -> list of containing license names
+	nameSubstrings map[string][]substring
+	// number of substrings per license
+	nameSubstringSizes map[string]int
+}
+
+type substring struct {
+	Value string
+	Count int
 }
 
 const (
@@ -108,6 +117,8 @@ func (db *LicenseDatabase) Load() {
 		println("LSH:", k, l)
 	}
 	db.hasher = NewWeightedMinHasher(len(uniqueTokens), numHashes, 7)
+	db.nameSubstrings = map[string][]substring{}
+	db.nameSubstringSizes = map[string]int{}
 	for key, tokens := range tokenFreqs {
 		indices := make([]int, len(tokens))
 		values := make([]float32, len(tokens))
@@ -120,12 +131,24 @@ func (db *LicenseDatabase) Load() {
 			}
 		}
 		db.lsh.Add(key, db.hasher.Hash(values, indices))
+
+		// register all substrings
+		parts := splitLicenseName(key)
+		db.nameSubstringSizes[key] = len(parts)
+		for _, part := range parts {
+			list := db.nameSubstrings[part.Value]
+			if list == nil {
+				list = []substring{}
+			}
+			list = append(list, substring{Value: key, Count: part.Count})
+			db.nameSubstrings[part.Value] = list
+		}
 	}
 	db.lsh.Index()
 }
 
-// Query returns the most similar registered licenses.
-func (db *LicenseDatabase) Query(text string) (options []string, similarities []float32) {
+// QueryLicenseText returns the most similar registered licenses.
+func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 	normalized := NormalizeLicenseText(text, false)
 	if db.Debug {
 		println(normalized)
@@ -154,10 +177,9 @@ func (db *LicenseDatabase) Query(text string) (options []string, similarities []
 		}
 	}
 	found := db.lsh.Query(db.hasher.Hash(values, indices))
-	options = make([]string, 0, len(found))
-	similarities = make([]float32, 0, len(found))
+	candidates := map[string]float32{}
 	if len(found) == 0 {
-		return
+		return map[string]float32{}
 	}
 	for _, keyint := range found {
 		key := keyint.(string)
@@ -183,10 +205,9 @@ func (db *LicenseDatabase) Query(text string) (options []string, similarities []
 		// TODO(vmarkovtsev): replace with dmp.DiffLevenshtein when this PR is merged:
 		// https://github.com/sergi/go-diff/pull/90
 		distance := diffLevenshtein(diff)
-		options = append(options, key)
-		similarities = append(similarities, float32(1)-float32(distance)/float32(len(myRunes)))
+		candidates[key] = float32(1)-float32(distance)/float32(len(myRunes))
 	}
-	return
+	return candidates
 }
 
 func diffLevenshtein(diffs []diffmatchpatch.Diff) int {
@@ -216,6 +237,11 @@ func diffLevenshtein(diffs []diffmatchpatch.Diff) int {
 
 	levenshtein += max(insertions, deletions)
 	return levenshtein
+}
+
+// QueryReadmeText tries to detect licenses mentioned in the README.
+func (db *LicenseDatabase) QueryReadmeText(text string) map[string]float32 {
+	return investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
 }
 
 func tfidf(freq int, docfreq int, ndocs int) float32 {
