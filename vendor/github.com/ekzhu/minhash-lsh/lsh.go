@@ -208,7 +208,7 @@ func (f *MinhashLSH) Index() {
 	wg.Wait()
 }
 
-// QueryLicenseText returns candidate keys given the query signature.
+// Query returns candidate keys given the query signature.
 func (f *MinhashLSH) Query(sig []uint64) []interface{} {
 	set := f.query(sig, f.k)
 	results := make([]interface{}, 0, len(set))
@@ -227,7 +227,7 @@ func (f *MinhashLSH) query(sig []uint64, minK int) map[interface{}]bool {
 		for i := 0; i < f.l; i++ {
 			Hs[i] = f.hashKeyFunc(sig[i*f.k : i*f.k+K])
 		}
-		// QueryLicenseText hash tables
+		// Query hash tables
 		for i := 0; i < f.l; i++ {
 			ht := f.hashTables[i]
 			hk := Hs[i]
