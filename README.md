@@ -49,6 +49,7 @@ Command line:
 
 ```bash
 license-detector /path/to/project
+license-detector https://github.com/src-d/go-git
 ```
 
 Library:
