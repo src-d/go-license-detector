@@ -24,8 +24,3 @@ func PreprocessRestructuredText(text string) string {
 	// Repeat to times to heal broken HTML
 	return PreprocessHTML(output.String())
 }
-
-// PreprocessHTML converts HTML to plain text. E.g. it rips all the tags.
-func PreprocessHTML(text string) string {
-	return HTML2Text(HTML2Text(text))
-}
