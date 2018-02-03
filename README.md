@@ -43,6 +43,14 @@ the corresponding text is the single line with each unigram represented by a sin
 This pipeline guarantees constant time queries, though requires some initialization to preprocess
 the reference licenses.
 
+If there are not license files found:
+
+1. Look for README files.
+2. If the file is Markdown or reStructuredText, render to HTML and then convert to plain text. Original HTML files are also converted.
+3. Scan for words like "copyright", "license" and "released under". Take the neighborhood.
+4. Run Named Entity Recognition (NER) over that surrounding context and extract the possible license name.
+5. Match it against the list of license names from SPDX.
+
 ## Usage
 
 Command line:
