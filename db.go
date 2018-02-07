@@ -20,13 +20,13 @@ type LicenseDatabase struct {
 	// license name -> text
 	licenseTexts map[string]string
 	// unique unigrams -> index
-	tokens       map[string]int
+	tokens map[string]int
 	// document frequencies of the unigrams, indexes match with `tokens`
-	docfreqs     []int
+	docfreqs []int
 	// Weighted MinHash hashtables
-	lsh          *minhashlsh.MinhashLSH
+	lsh *minhashlsh.MinhashLSH
 	// turns a license text into a hash
-	hasher       *WeightedMinHasher
+	hasher *WeightedMinHasher
 	// part of license name -> list of containing license names
 	nameSubstrings map[string][]substring
 	// number of substrings per license
@@ -205,7 +205,7 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 		// TODO(vmarkovtsev): replace with dmp.DiffLevenshtein when this PR is merged:
 		// https://github.com/sergi/go-diff/pull/90
 		distance := diffLevenshtein(diff)
-		candidates[key] = float32(1)-float32(distance)/float32(len(myRunes))
+		candidates[key] = float32(1) - float32(distance)/float32(len(myRunes))
 	}
 	return candidates
 }
@@ -214,7 +214,7 @@ func diffLevenshtein(diffs []diffmatchpatch.Diff) int {
 	levenshtein := 0
 	insertions := 0
 	deletions := 0
-	max := func (a, b int) int {
+	max := func(a, b int) int {
 		if a < b {
 			return b
 		}
