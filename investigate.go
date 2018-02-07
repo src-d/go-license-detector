@@ -49,7 +49,7 @@ var (
 			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 
 	readmeFileRe = regexp.MustCompile(fmt.Sprintf("^readme(%s)$",
-			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
+		strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 )
 
 // InvestigateProjectLicenses returns the most probable reference licenses matched for the given
@@ -74,7 +74,7 @@ func InvestigateProjectLicenses(path string) (map[string]float32, error) {
 // InvestigateFilesLicenses scans the given list of file names, reads them with `reader` and
 // detects the licenses. Each match has the confidence assigned, from 0 to 1, 1 means 100% confident.
 func InvestigateFilesLicenses(
-		fileNames []string, reader func(string) (string, error)) (map[string]float32, error) {
+	fileNames []string, reader func(string) (string, error)) (map[string]float32, error) {
 	candidates := ExtractLicenseFiles(fileNames, reader)
 	if len(candidates) == 0 {
 		// Plan B: take the README, find the section about the license and apply NER

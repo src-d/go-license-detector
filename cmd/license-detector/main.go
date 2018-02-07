@@ -6,48 +6,99 @@ import (
 	"sort"
 	"strings"
 
-	"gopkg.in/src-d/go-license-detector.v1"
+	"encoding/json"
+	"github.com/spf13/pflag"
 	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/storage/memory"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"gopkg.in/src-d/go-git.v4/storage/memory"
+	"gopkg.in/src-d/go-license-detector.v1"
+	"sync"
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintln(os.Stderr, "Usage: licenseng <path>")
+	var outputFormat string
+	pflag.StringVarP(&outputFormat, "format", "f", "text", "Output format, choose one of json, text.")
+	pflag.Parse()
+	if pflag.NArg() == 0 {
+		fmt.Fprintln(os.Stderr, "Usage: license-detector <path> [<path>...]")
 		os.Exit(1)
 	}
-	arg := os.Args[1]
-	_, err := os.Stat(arg)
-	var licenses map[string]float32
-	if err == nil {
-		licenses, err = getLicensesByPath(arg)
-	} else {
-		licenses, err = getLicensesByURL(arg)
+	formatter := formatters[outputFormat]
+	if formatter == nil {
+		fmt.Fprintf(os.Stderr, "Unknown format \"%s\", choose one of json, text.\n", outputFormat)
+		os.Exit(1)
 	}
+	results := make([]analysisResult, pflag.NArg())
+	wg := sync.WaitGroup{}
+	wg.Add(pflag.NArg())
+	for argIndex, arg := range pflag.Args() {
+		go func(argIndex int, arg string) {
+			_, err := os.Stat(arg)
+			var licenses map[string]float32
+			if err == nil {
+				licenses, err = getLicensesByDirectory(arg)
+			} else {
+				licenses, err = getLicensesByURL(arg)
+			}
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
+			results[argIndex] = analysisResult{Name: arg, Licenses: licenses}
+			wg.Done()
+		}(argIndex, arg)
+	}
+	wg.Wait()
+	formatter(results)
+}
+
+type analysisResult struct {
+	Name     string
+	Licenses map[string]float32
+}
+
+var formatters = map[string]func([]analysisResult){
+	"json": formatJSON,
+	"text": formatText,
+}
+
+func formatJSON(results []analysisResult) {
+	serialized, err := json.Marshal(results)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+		panic(err)
 	}
-	licenseStrs := make([]string, 0, len(licenses))
-	for key, val := range licenses {
-		licenseStrs = append(licenseStrs, fmt.Sprintf("%.1f%%\t%s", val*100, key))
-	}
-	sort.Sort(sort.Reverse(sort.StringSlice(licenseStrs)))
-	// 100.0% is sadly but fairly placed at the end
-	for _, s := range licenseStrs {
-		if strings.HasPrefix(s, "100.0%") {
-			fmt.Println(s)
+	os.Stdout.Write(serialized)
+	fmt.Println()
+}
+
+func formatText(results []analysisResult) {
+	for resultIndex, result := range results {
+		if len(results) > 1 {
+			if resultIndex > 0 {
+				fmt.Println()
+			}
+			fmt.Println(result.Name)
 		}
-	}
-	for _, s := range licenseStrs {
-		if !strings.HasPrefix(s, "100.0%") {
-			fmt.Println(s)
+		licenseStrs := make([]string, 0, len(result.Licenses))
+		for key, val := range result.Licenses {
+			licenseStrs = append(licenseStrs, fmt.Sprintf("%.1f%%\t%s", val*100, key))
+		}
+		sort.Sort(sort.Reverse(sort.StringSlice(licenseStrs)))
+		// 100.0% is sadly but fairly placed at the end
+		for _, s := range licenseStrs {
+			if strings.HasPrefix(s, "100.0%") {
+				fmt.Println(s)
+			}
+		}
+		for _, s := range licenseStrs {
+			if !strings.HasPrefix(s, "100.0%") {
+				fmt.Println(s)
+			}
 		}
 	}
 }
 
-func getLicensesByPath(path string) (map[string]float32, error) {
+func getLicensesByDirectory(path string) (map[string]float32, error) {
 	return ld.InvestigateProjectLicenses(path)
 }
 
