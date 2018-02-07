@@ -201,42 +201,10 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 			tokarr[len(db.tokens)] = "!"
 			println(dmp.DiffPrettyText(dmp.DiffCharsToLines(diff, tokarr)))
 		}
-
-		// TODO(vmarkovtsev): replace with dmp.DiffLevenshtein when this PR is merged:
-		// https://github.com/sergi/go-diff/pull/90
-		distance := diffLevenshtein(diff)
+		distance := dmp.DiffLevenshtein(diff)
 		candidates[key] = float32(1) - float32(distance)/float32(len(myRunes))
 	}
 	return candidates
-}
-
-func diffLevenshtein(diffs []diffmatchpatch.Diff) int {
-	levenshtein := 0
-	insertions := 0
-	deletions := 0
-	max := func(a, b int) int {
-		if a < b {
-			return b
-		}
-		return a
-	}
-
-	for _, aDiff := range diffs {
-		switch aDiff.Type {
-		case diffmatchpatch.DiffInsert:
-			insertions += len(aDiff.Text)
-		case diffmatchpatch.DiffDelete:
-			deletions += len(aDiff.Text)
-		case diffmatchpatch.DiffEqual:
-			// A deletion and an insertion is one substitution.
-			levenshtein += max(insertions, deletions)
-			insertions = 0
-			deletions = 0
-		}
-	}
-
-	levenshtein += max(insertions, deletions)
-	return levenshtein
 }
 
 // QueryReadmeText tries to detect licenses mentioned in the README.

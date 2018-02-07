@@ -76,8 +76,7 @@
 [[projects]]
   name = "github.com/sergi/go-diff"
   packages = ["diffmatchpatch"]
-  revision = "1744e2970ca51c86172c8190fadad617561ed6e7"
-  version = "v1.0.0"
+  revision = "da645544ed44df016359bd4c0e3dc60ee3a0da43"
 
 [[projects]]
   branch = "master"
@@ -90,6 +89,12 @@
   name = "github.com/shurcooL/sanitized_anchor_name"
   packages = ["."]
   revision = "86672fcb3f950f35f2e675df2240550f2a50762f"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "4c012f6dcd9546820e378d0bdda4d8fc772cdfea"
 
 [[projects]]
   name = "github.com/src-d/gcfg"
@@ -279,6 +284,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e7cedd088784c7e3b13d360efc5a8473bc43a125c034e911ecc406ce4438e158"
+  inputs-digest = "898770de21c7021be4b44bd39ffd9b1b37085878484c335dad3cfeda7dd0f210"
   solver-name = "gps-cdcl"
   solver-version = 1
