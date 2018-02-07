@@ -17,7 +17,7 @@ var (
 	digitsRe            = regexp.MustCompile("[0-9]+")
 )
 
-// investigateReadmeFile is the implementation of InvestigateReadmeFile.
+// investigateReadmeFile is the implementation of InvestigateReadmeText.
 // It takes two additional arguments: licenseNameParts and licenseNameSizes.
 // The idea is to map substrings to real licenses, and the confidence is
 // <the number of matches> / <overall number of substrings>.
@@ -41,9 +41,12 @@ func investigateReadmeFile(
 				text[beginIndex] != '\n' && beginIndex < matches[0][0]; beginIndex++ {
 			}
 		}
-		for ; text[endIndex] != ' ' && text[endIndex] != '\t' &&
-			text[endIndex] != '\n' && endIndex < len(text); endIndex++ {
+		for ; endIndex < len(text) && text[endIndex] != ' ' && text[endIndex] != '\t' &&
+			text[endIndex] != '\n'; endIndex++ {
 		}
+	}
+	if endIndex > len(text) {
+		endIndex = len(text)
 	}
 	suspectedText := text[beginIndex:endIndex]
 	suspectedWords := tokenize.TextToWords(suspectedText)

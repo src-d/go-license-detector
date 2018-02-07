@@ -33,6 +33,7 @@ func main() {
 	wg.Add(pflag.NArg())
 	for argIndex, arg := range pflag.Args() {
 		go func(argIndex int, arg string) {
+			defer wg.Done()
 			_, err := os.Stat(arg)
 			var licenses map[string]float32
 			if err == nil {
@@ -45,7 +46,6 @@ func main() {
 				os.Exit(1)
 			}
 			results[argIndex] = analysisResult{Name: arg, Licenses: licenses}
-			wg.Done()
 		}(argIndex, arg)
 	}
 	wg.Wait()
