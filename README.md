@@ -70,6 +70,12 @@ func main() {
 }
 ```
 
+## Quality
+
+On the [dataset](dataset.zip) of 1000 most starred repositories on GitHub as of early Februrary 2018
+([list](dataset.projects.gz)), **80%** licenses are detected. Not all repositories have license information,
+so this number is actually bigger. The analysis of detection failures is going in [FAILURES.md](FAILURES.md).
+
 ## Regenerate binary data
 
 The SPDX licenses are included into the binary. To update them, run
