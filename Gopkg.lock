@@ -68,6 +68,12 @@
   version = "v0.2.0"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -76,7 +82,8 @@
 [[projects]]
   name = "github.com/sergi/go-diff"
   packages = ["diffmatchpatch"]
-  revision = "da645544ed44df016359bd4c0e3dc60ee3a0da43"
+  revision = "1744e2970ca51c86172c8190fadad617561ed6e7"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -89,12 +96,6 @@
   name = "github.com/shurcooL/sanitized_anchor_name"
   packages = ["."]
   revision = "86672fcb3f950f35f2e675df2240550f2a50762f"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/spf13/pflag"
-  packages = ["."]
-  revision = "4c012f6dcd9546820e378d0bdda4d8fc772cdfea"
 
 [[projects]]
   name = "github.com/src-d/gcfg"
@@ -139,7 +140,7 @@
     "ssh/agent",
     "ssh/knownhosts"
   ]
-  revision = "1875d0a70c90e57f11972aefd42276df65e895b9"
+  revision = "d9133f5469342136e669e85192a26056b587f503"
 
 [[projects]]
   branch = "master"
@@ -155,7 +156,7 @@
     "html",
     "html/atom"
   ]
-  revision = "2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1"
+  revision = "f5dfe339be1d06f81b22525fe34671ee7d2c8904"
 
 [[projects]]
   branch = "master"
@@ -174,7 +175,7 @@
     "unicode/cldr",
     "unicode/norm"
   ]
-  revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
+  revision = "4e4a3210bb54bb31f6ab2cdca2edcc0b50c420c1"
 
 [[projects]]
   branch = "master"
@@ -199,7 +200,7 @@
     "stat",
     "stat/distuv"
   ]
-  revision = "95fab73f1d50d4ccbf4b9e5b6a3d2dfbb5130b05"
+  revision = "996b88e8f8941c9defdbb338bea5e239a230e742"
 
 [[projects]]
   name = "gopkg.in/neurosnap/sentences.v1"
@@ -284,6 +285,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "898770de21c7021be4b44bd39ffd9b1b37085878484c335dad3cfeda7dd0f210"
+  inputs-digest = "c41757b8be820c8d187587315660383e18a268ec3b5f5b5a1b1f0283f2292b41"
   solver-name = "gps-cdcl"
   solver-version = 1
