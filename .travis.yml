@@ -18,7 +18,7 @@ script:
   - if [[ "$(go version)" != *go1.8* ]]; then go vet ./...; fi
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi
-  - go test -cpu=1,2 -coverprofile=coverage.txt -covermode=count gopkg.in/src-d/go-license-detector.v1
+  - go test -cpu=1,2 gopkg.in/src-d/go-license-detector.v1/...
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
