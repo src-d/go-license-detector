@@ -104,3 +104,38 @@ will be extended to support those.
 * [linnovate/mean](https://github.com/linnovate/mean/blob/master/LICENSE) - MIT with broken lines, clear failure.
 * [sqlmapproject/sqlmap](https://github.com/sqlmapproject/sqlmap/blob/master/LICENSE) - GPL with custom formatting, not difficult.
 * [bcit-ci/CodeIgniter](https://github.com/bcit-ci/CodeIgniter/blob/develop/license.txt) - MIT, clear failure.
+* [terryum/awesome-deep-learning-papers](https://github.com/terryum/awesome-deep-learning-papers) - README points to CC0.
+* [google/protobuf](https://github.com/google/protobuf/blob/master/LICENSE) - BSD with custom header.
+* [rapid7/metasploit-framework](https://github.com/rapid7/metasploit-framework/blob/master/COPYING) - BSD with custom footer.
+* [ipython/ipython](https://github.com/ipython/ipython/blob/master/COPYING.rst) - custom format, huge footer.
+* [moklick/frontend-stuff](https://github.com/moklick/frontend-stuff/blob/master/LICENSE) - CC0, clear failure.
+* [neovim/neovim](https://github.com/neovim/neovim/blob/master/LICENSE) - Apache with custom header, clear failure.
+* [sorrycc/awesome-javascript](https://github.com/sorrycc/awesome-javascript#license) - `README` points to CC0.
+* [date-fns/date-fns](https://github.com/date-fns/date-fns/blob/master/LICENSE.md) - custom text, points to http://kossnocorp.mit-license.org/.
+* [froala/design-blocks](https://github.com/froala/design-blocks/blob/dev/LICENSE) - FROALA OPEN WEB DESIGN LICENSE.
+* [gionkunz/chartist-js](https://github.com/gionkunz/chartist-js/blob/develop/LICENSE-MIT) - the file is `LICENSE-MIT`.
+* [shadowsocks/shadowsocks-android](https://github.com/shadowsocks/shadowsocks-android/blob/master/LICENSE) - shortened GPL.
+* [realm/realm-cocoa](https://github.com/realm/realm-cocoa/blob/master/LICENSE) - Apache concatenated with other content.
+* [donnemartin/data-science-ipython-notebooks](https://github.com/donnemartin/data-science-ipython-notebooks/blob/master/LICENSE) - points to Apache.
+* [moment/moment](https://github.com/moment/moment/blob/develop/LICENSE) - MIT, clear failure.
+* [fbsamples/f8app](https://github.com/fbsamples/f8app/blob/master/LICENSE) - customized MIT.
+* [webpack/webpack](https://github.com/webpack/webpack/blob/master/LICENSE) - MIT, clear failure.
+* [kamranahmedse/design-patterns-for-humans](https://github.com/kamranahmedse/design-patterns-for-humans#license) - `README` points to CC-BY 4.0.
+* [jquery/jquery-mobile](https://github.com/jquery/jquery-mobile/blob/master/LICENSE.txt) - concatenation of JQuery and CC0.
+* [gztchan/awesome-design](https://github.com/gztchan/awesome-design) - `README` points to CC0.
+* [php-fig/fig-standards](https://github.com/php-fig/fig-standards) - the file names are `LICENSE-CC.md` and `LICENSE-MIT.md`.
+* [jquery/jquery](https://github.com/jquery/jquery/blob/master/LICENSE.txt) - JQuery with custom footer (he-he).
+* [mozilla/BrowserQuest](https://github.com/mozilla/BrowserQuest/blob/master/LICENSE) - file points to MPL and CC-BY-SA 3.0.
+* [VundleVim/Vundle.vim](https://github.com/VundleVim/Vundle.vim/blob/master/LICENSE-MIT.txt) - the file name is `LICENSE-MIT.txt`.
+* [carhartl/jquery-cookie](https://github.com/carhartl/jquery-cookie/blob/master/MIT-LICENSE.txt) - the file name is `MIT-LICENSE.txt`.
+* [sindresorhus/awesome-electron](https://github.com/sindresorhus/awesome-electron) - `README` points to CC0.
+* [alibaba/fastjson](https://github.com/alibaba/fastjson/blob/master/license.txt) - file points to Apache.
+* [Alamofire/Alamofire](https://github.com/Alamofire/Alamofire/blob/master/LICENSE) - MIT, clear failure.
+* [Reactive-Extensions/RxJS](https://github.com/Reactive-Extensions/RxJS/blob/master/license.txt) - points to Apache.
+* [kamranahmedse/developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) - `README` points to CC-BY 3.0.
+* [JetBrains/kotlin](https://github.com/JetBrains/kotlin/tree/master/license) - `license` directory, the standard file there points to Apache.
+* [Swordfish90/cool-retro-term](https://github.com/Swordfish90/cool-retro-term) - `gpl-3.0.txt` and `gpl-2.0.txt` files.
+* [lord/slate](https://github.com/lord/slate/blob/master/LICENSE) - points to Apache.
+* [nwjs/nw.js](https://github.com/nwjs/nw.js/blob/nw28/LICENSE) - MIT, clear failure.
+* [FortAwesome/Font-Awesome](https://github.com/FortAwesome/Font-Awesome/blob/master/LICENSE.txt) - custom format, mentions several licenses.
+* [hapijs/hapi](https://github.com/hapijs/hapi/blob/master/LICENSE) - BSD with custom header and especially footer.
