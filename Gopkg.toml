@@ -16,7 +16,7 @@
 
 [[constraint]]
   name = "github.com/sergi/go-diff"
-  version = "1.0.0"
+  revision = "da645544ed44df016359bd4c0e3dc60ee3a0da43"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -41,6 +41,10 @@
 [[constraint]]
   name = "gopkg.in/src-d/go-git.v4"
   version = "4.1.0"
+
+[[constraint]]
+  name = "github.com/spf13/pflag"
+  version = "1.0.0"
 
 [prune]
   go-tests = true

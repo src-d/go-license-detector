@@ -5,26 +5,26 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/url"
 	"os"
 	"sort"
 	"sync"
 
-	"gopkg.in/src-d/go-license-detector.v1/detector"
-	"gopkg.in/src-d/go-license-detector.v1/detector/filer"
+	"github.com/spf13/pflag"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
 )
 
 func main() {
-	format := flag.String("f", "text", "Output format: json, text")
-	flag.Usage = func() {
+	format := pflag.String("f", "text", "Output format: json, text")
+	pflag.Usage = func() {
 		fmt.Println("Usage:  license-detector path ...")
-		flag.PrintDefaults()
+		pflag.PrintDefaults()
 	}
-	flag.Parse()
-	if (*format != "json" && *format != "text") || flag.NArg() == 0 {
-		flag.Usage()
+	pflag.Parse()
+	if (*format != "json" && *format != "text") || pflag.NArg() == 0 {
+		pflag.Usage()
 		os.Exit(1)
 	}
 
@@ -33,10 +33,10 @@ func main() {
 		Matches []match `json:",omitempty"`
 		Err     error   `json:",omitempty"`
 	}
-	results := make([]result, flag.NArg())
+	results := make([]result, pflag.NArg())
 	var wg sync.WaitGroup
-	wg.Add(flag.NArg())
-	for i, arg := range flag.Args() {
+	wg.Add(pflag.NArg())
+	for i, arg := range pflag.Args() {
 		go func(i int, arg string) {
 			defer wg.Done()
 			matches, err := process(*format, arg)
@@ -83,7 +83,7 @@ func process(format, arg string) ([]match, error) {
 		return nil, err
 	}
 
-	ls, err := detector.Licenses(filer)
+	ls, err := licensedb.Detect(filer)
 	if err != nil {
 		return nil, err
 	}

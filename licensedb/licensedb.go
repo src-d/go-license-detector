@@ -1,12 +1,12 @@
-package detector
+package licensedb
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
 
-	"gopkg.in/src-d/go-license-detector.v1/detector/filer"
-	"gopkg.in/src-d/go-license-detector.v1/detector/internal/processors"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/processors"
 )
 
 var (
@@ -48,9 +48,9 @@ var (
 		strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 )
 
-// Licenses scans the given list of file names and detects the licenses.
+// Detect scans the given list of file names and detects the licenses.
 // Each match has the confidence assigned, from 0 to 1, 1 means 100% confident.
-func Licenses(f filer.Filer) (map[string]float32, error) {
+func Detect(f filer.Filer) (map[string]float32, error) {
 	patterns := []struct {
 		regexp *regexp.Regexp
 		query  func(string) map[string]float32

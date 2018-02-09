@@ -1,4 +1,4 @@
-package detector
+package licensedb
 
 import (
 	"regexp"

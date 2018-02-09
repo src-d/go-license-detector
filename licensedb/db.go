@@ -1,4 +1,4 @@
-package detector
+package licensedb
 
 import (
 	"archive/tar"
@@ -11,9 +11,9 @@ import (
 	"github.com/ekzhu/minhash-lsh"
 	"github.com/sergi/go-diff/diffmatchpatch"
 
-	"gopkg.in/src-d/go-license-detector.v1/detector/internal/assets"
-	"gopkg.in/src-d/go-license-detector.v1/detector/internal/normalize"
-	"gopkg.in/src-d/go-license-detector.v1/detector/internal/wmh"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/assets"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/normalize"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/wmh"
 )
 
 // database holds the license texts, their hashes and the hashtables to query for nearest
