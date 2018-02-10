@@ -144,6 +144,7 @@ will be extended to support those.
 * [cockroachdb/cockroach](https://github.com/cockroachdb/cockroach/blob/master/LICENSE) - custom text, mentions Apache, CCL, MIT and BSD, 
 * [fbsamples/f8app](https://github.com/fbsamples/f8app/blob/master/LICENSE) - customized MIT.
 * [FortAwesome/Font-Awesome](https://github.com/FortAwesome/Font-Awesome/blob/master/LICENSE.txt) - custom format, mentions several licenses.
+* [Microsoft/api-guidelines](https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md#44-license) - pointer to CC-BY 4.0 in `Guidelines.md`.
 
 ### Miscellaneous
 * [IanLunn/Hover](https://github.com/IanLunn/Hover/blob/master/license.txt) - custom license, nothing can be done.
