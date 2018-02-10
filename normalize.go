@@ -74,6 +74,7 @@ var (
 	// extra cleanup
 	brokenLinkRe = regexp.MustCompile("http s ://")
 	urlCleanupRe = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
+	copyrightLineRe = regexp.MustCompile("(?m)^©.*\n")
 )
 
 // NormalizeLicenseText makes a license text ready for analysis.
@@ -114,7 +115,9 @@ func NormalizeLicenseText(text string, strict bool) string {
 	if !strict {
 		// there are common mismatches because of trailing dots
 		text = strings.Replace(text, ".", "", -1)
+		text = copyrightLineRe.ReplaceAllString(text, "")
 	}
+	text = leadingWhitespaceRe.ReplaceAllString(text, "")
 
 	return text
 }

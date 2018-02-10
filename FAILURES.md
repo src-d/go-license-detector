@@ -15,17 +15,14 @@ will be extended to support those.
 * [eslint/eslint](https://github.com/eslint/eslint/blob/master/LICENSE) - MIT, clear failure.
 * [CocoaLumberjack/CocoaLumberjack](https://github.com/CocoaLumberjack/CocoaLumberjack/blob/master/LICENSE.txt) - BSD, clear failure.
 * [linnovate/mean](https://github.com/linnovate/mean/blob/master/LICENSE) - MIT with broken lines, clear failure.
-* [sqlmapproject/sqlmap](https://github.com/sqlmapproject/sqlmap/blob/master/LICENSE) - GPL with custom formatting, not difficult.
 * [bcit-ci/CodeIgniter](https://github.com/bcit-ci/CodeIgniter/blob/develop/license.txt) - MIT, clear failure.
-* [moklick/frontend-stuff](https://github.com/moklick/frontend-stuff/blob/master/LICENSE) - CC0, clear failure.
-* [neovim/neovim](https://github.com/neovim/neovim/blob/master/LICENSE) - Apache with custom header, clear failure.
 * [moment/moment](https://github.com/moment/moment/blob/develop/LICENSE) - MIT, clear failure.
 * [webpack/webpack](https://github.com/webpack/webpack/blob/master/LICENSE) - MIT, clear failure.
 * [Alamofire/Alamofire](https://github.com/Alamofire/Alamofire/blob/master/LICENSE) - MIT, clear failure.
 
 ### Custom file names
 * [atech/postal](https://github.com/atech/postal) - the file is `MIT-LICENCE`.
-* [rust-lang/rust](https://github.com/rust-lang/rust) - license files: `LICENSE-APACHE` and `LICENSE-MIT`; also the README tells about them.
+* [rust-lang/rust](https://github.com/rust-lang/rust) - license files: `LICENSE-APACHE` and `LICENSE-MIT`; also the `README` tells about them.
 * [ariya/phantomjs](https://github.com/ariya/phantomjs/blob/master/LICENSE.BSD) - the file is `LICENSE.BSD`.
 * [mpv-player/mpv](https://github.com/mpv-player/mpv) - `LICENSE.GPL` and `LICENSE.LGPL`.
 * [v8/v8](https://github.com/v8/v8) - `LICENSE.v8` and 4 other custom suffixes; `LICENSE` is a concatenation.
@@ -38,16 +35,15 @@ will be extended to support those.
 * [VundleVim/Vundle.vim](https://github.com/VundleVim/Vundle.vim/blob/master/LICENSE-MIT.txt) - the file name is `LICENSE-MIT.txt`.
 * [carhartl/jquery-cookie](https://github.com/carhartl/jquery-cookie/blob/master/MIT-LICENSE.txt) - the file name is `MIT-LICENSE.txt`.
 * [JetBrains/kotlin](https://github.com/JetBrains/kotlin/tree/master/license) - `license` directory, the standard file there points to Apache.
-* [Swordfish90/cool-retro-term](https://github.com/Swordfish90/cool-retro-term) - `gpl-3.0.txt` and `gpl-2.0.txt` files.
 
 ### Pointers
 * [akullpp/awesome-java](https://github.com/akullpp/awesome-java/blob/master/LICENSE.md) - file consists of the single reference to CC-BY-SA-4.0.
 * [Unitech/pm2](https://github.com/Unitech/pm2/blob/master/LICENSE) - the whole content is the name of the real license file.
 * [ruanyf/es6tutorial](https://github.com/ruanyf/es6tutorial/blob/gh-pages/LICENSE) - human-readable summary of CC-BY-NC 4.0.
-* [lukasz-madon/awesome-remote-job](https://github.com/lukasz-madon/awesome-remote-job) - README contains a link to CC0.
-* [sindresorhus/quick-look-plugins](https://github.com/sindresorhus/quick-look-plugins) - README points to CC0.
-* [MaximAbramchuck/awesome-interview-questions](https://github.com/MaximAbramchuck/awesome-interview-questions) - README states CC0.
-* [enaqx/awesome-react](https://github.com/enaqx/awesome-react#license) - README states CC0.
+* [lukasz-madon/awesome-remote-job](https://github.com/lukasz-madon/awesome-remote-job) - `README` contains a link to CC0.
+* [sindresorhus/quick-look-plugins](https://github.com/sindresorhus/quick-look-plugins) - `README` points to CC0.
+* [MaximAbramchuck/awesome-interview-questions](https://github.com/MaximAbramchuck/awesome-interview-questions) - `README` states CC0.
+* [enaqx/awesome-react](https://github.com/enaqx/awesome-react#license) - `README` states CC0.
 * [sorrycc/awesome-javascript](https://github.com/sorrycc/awesome-javascript#license) - `README` points to CC0.
 * [vuejs/awesome-vue](https://github.com/vuejs/awesome-vue) - CC0 is appended to the end of `README`.
 * [terryum/awesome-deep-learning-papers](https://github.com/terryum/awesome-deep-learning-papers) - `README` points to CC0.
@@ -108,6 +104,7 @@ will be extended to support those.
 * [ipython/ipython](https://github.com/ipython/ipython/blob/master/COPYING.rst) - custom format, huge footer.
 * [jquery/jquery](https://github.com/jquery/jquery/blob/master/LICENSE.txt) - JQuery with custom footer (he-he).
 * [hapijs/hapi](https://github.com/hapijs/hapi/blob/master/LICENSE) - BSD with custom header and especially footer.
+* [sqlmapproject/sqlmap](https://github.com/sqlmapproject/sqlmap/blob/master/LICENSE) - GPL with custom header.
 
 ### Concatenations
 * [nodejs/node](https://github.com/nodejs/node/blob/master/LICENSE) - multiple licenses in the same file.
@@ -144,10 +141,14 @@ will be extended to support those.
 * [cockroachdb/cockroach](https://github.com/cockroachdb/cockroach/blob/master/LICENSE) - custom text, mentions Apache, CCL, MIT and BSD, 
 * [fbsamples/f8app](https://github.com/fbsamples/f8app/blob/master/LICENSE) - customized MIT.
 * [FortAwesome/Font-Awesome](https://github.com/FortAwesome/Font-Awesome/blob/master/LICENSE.txt) - custom format, mentions several licenses.
+* [Microsoft/api-guidelines](https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md#44-license) - pointer to CC-BY 4.0 in `Guidelines.md`.
+* [neovim/neovim](https://github.com/neovim/neovim/blob/master/LICENSE) - Apache with custom header and notes.
+* [moklick/frontend-stuff](https://github.com/moklick/frontend-stuff/blob/master/LICENSE) - summarized CC0.
 
 ### Miscellaneous
 * [IanLunn/Hover](https://github.com/IanLunn/Hover/blob/master/license.txt) - custom license, nothing can be done.
-* [xdissent/ievms](https://github.com/xdissent/ievms) - "none" license stated in the README.
+* [xdissent/ievms](https://github.com/xdissent/ievms) - "none" license stated in the `README`.
 * [isocpp/CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines/blob/master/LICENSE) - custom license.
-* [Modernizr/Modernizr](https://github.com/Modernizr/Modernizr) - license file is a joke, README mentions MIT.
+* [Modernizr/Modernizr](https://github.com/Modernizr/Modernizr) - license file is a joke, `README` mentions MIT.
 * [froala/design-blocks](https://github.com/froala/design-blocks/blob/dev/LICENSE) - FROALA OPEN WEB DESIGN LICENSE.
+* [Swordfish90/cool-retro-term](https://github.com/Swordfish90/cool-retro-term) - `gpl-3.0.txt` and `gpl-2.0.txt` files.

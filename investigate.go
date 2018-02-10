@@ -16,14 +16,10 @@ var (
 
 	globalLicenseDatabase = &LicenseDatabase{}
 
-	// Base names of guessable license files.
-	fileNames = []string{
-		"copying",
-		"copyleft",
-		"copyright",
-		"license",
+	// Base names of guessable license files - except all variants of LICENSE.
+	alternativeLicenseFileNames = []string{
+		"copy(left|right|ing)",
 		"unlicense",
-		"licence",
 	}
 
 	// License file extensions. Combined with the fileNames slice
@@ -44,12 +40,14 @@ var (
 	}
 
 	licenseFileRe = regexp.MustCompile(
-		fmt.Sprintf("^(%s)(%s)$",
-			strings.Join(fileNames, "|"),
+		fmt.Sprintf("(^(|.*[-_.])li[cs]en[cs]e(|[-_.].*)$)|(^(%s)(%s)$)",
+			strings.Join(alternativeLicenseFileNames, "|"),
 			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 
 	readmeFileRe = regexp.MustCompile(fmt.Sprintf("^readme(%s)$",
 		strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
+
+	pureLicenseFileRe = regexp.MustCompile("^li[cs]en[cs]e$")
 )
 
 // InvestigateProjectLicenses returns the most probable reference licenses matched for the given
@@ -63,6 +61,16 @@ func InvestigateProjectLicenses(path string) (map[string]float32, error) {
 	for _, file := range files {
 		if !file.IsDir() {
 			fileNames = append(fileNames, file.Name())
+		} else if pureLicenseFileRe.MatchString(strings.ToLower(file.Name())) {
+			// "license" directory, let's look inside
+			subfiles, err := ioutil.ReadDir(paths.Join(path, file.Name()))
+			if err != nil {
+				for _, subfile := range subfiles {
+					if !subfile.IsDir() {
+						fileNames = append(fileNames, paths.Join(file.Name(), subfile.Name()))
+					}
+				}
+			}
 		}
 	}
 	return InvestigateFilesLicenses(fileNames, func(file string) (string, error) {
