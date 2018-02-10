@@ -7,6 +7,8 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
+const maxUint16 = 65536
+
 // WeightedMinHasher calculates Weighted MinHash-es.
 // https://ekzhu.github.io/datasketch/weightedminhash.html
 type WeightedMinHasher struct {
@@ -14,7 +16,7 @@ type WeightedMinHasher struct {
 	sampleSize int
 	rs         [][]float32
 	lnCs       [][]float32
-	betas      [][]float32
+	betas      [][]uint16  // attempt to save some memory - [0, 1] is scaled to maxUint16
 }
 
 // NewWeightedMinHasher initializes a new instance of WeightedMinHasher.
@@ -42,12 +44,12 @@ func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHashe
 		}
 	}
 	uniformGen := distuv.Uniform{Min: 0, Max: 1, Src: randSrc}
-	hasher.betas = make([][]float32, sampleSize)
+	hasher.betas = make([][]uint16, sampleSize)
 	for y := 0; y < sampleSize; y++ {
-		arr := make([]float32, dim)
+		arr := make([]uint16, dim)
 		hasher.betas[y] = arr
 		for x := 0; x < dim; x++ {
-			arr[x] = float32(uniformGen.Rand())
+			arr[x] = uint16(uniformGen.Rand() * maxUint16)
 		}
 	}
 	return hasher
@@ -69,7 +71,7 @@ func (wmh *WeightedMinHasher) Hash(values []float32, indices []int) []uint64 {
 			// t = np.floor((vlog / self.rs[i]) + self.betas[i])
 			t := math.Floor(vlog/float64(wmh.rs[s][j])) + float64(wmh.betas[s][j])
 			// ln_y = (t - self.betas[i]) * self.rs[i]
-			lnY := (t - float64(wmh.betas[s][j])) * float64(wmh.rs[s][j])
+			lnY := (t - float64(wmh.betas[s][j])) / maxUint16 * float64(wmh.rs[s][j])
 			// ln_a = self.ln_cs[i] - ln_y - self.rs[i]
 			lnA := float64(wmh.lnCs[s][j]) - lnY - float64(wmh.rs[s][j])
 			// k = np.nanargmin(ln_a)
