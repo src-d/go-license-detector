@@ -39,7 +39,7 @@ type substring struct {
 }
 
 const (
-	numHashes              = 100
+	numHashes              = 154
 	lshSimilarityThreshold = 0.75
 )
 
@@ -84,9 +84,10 @@ func (db *LicenseDatabase) Load() {
 		myUniqueTokens := map[string]int{}
 		tokenFreqs[key] = myUniqueTokens
 		for _, line := range lines {
-			tokens := strings.Split(line, " ")
-			for _, token := range tokens {
-				myUniqueTokens[token]++
+			for _, token := range strings.Split(line, " ") {
+				if len(token) > 0 {
+					myUniqueTokens[token]++
+				}
 			}
 		}
 	}
@@ -158,6 +159,9 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 	oovRune := rune(len(db.tokens))
 	for _, line := range strings.Split(normalized, "\n") {
 		for _, token := range strings.Split(line, " ") {
+			if len(token) == 0 {
+				continue
+			}
 			if index, exists := db.tokens[token]; exists {
 				tokens[index]++
 				myRunes = append(myRunes, rune(index))
@@ -187,7 +191,9 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 		yourRunes := make([]rune, 0, len(text)/6)
 		for _, line := range strings.Split(text, "\n") {
 			for _, token := range strings.Split(line, " ") {
-				yourRunes = append(yourRunes, rune(db.tokens[token]))
+				if len(token) > 0 {
+					yourRunes = append(yourRunes, rune(db.tokens[token]))
+				}
 			}
 		}
 		dmp := diffmatchpatch.New()
@@ -199,6 +205,7 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 				tokarr[val] = key
 			}
 			tokarr[len(db.tokens)] = "!"
+			println(key + "↴")
 			println(dmp.DiffPrettyText(dmp.DiffCharsToLines(diff, tokarr)))
 		}
 		distance := dmp.DiffLevenshtein(diff)
