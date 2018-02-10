@@ -16,14 +16,10 @@ var (
 
 	globalLicenseDatabase = &LicenseDatabase{}
 
-	// Base names of guessable license files.
-	fileNames = []string{
-		"copying",
-		"copyleft",
-		"copyright",
-		"license",
+	// Base names of guessable license files - except all variants of LICENSE.
+	alternativeLicenseFileNames = []string{
+		"copy(left|right|ing)",
 		"unlicense",
-		"licence",
 	}
 
 	// License file extensions. Combined with the fileNames slice
@@ -44,8 +40,8 @@ var (
 	}
 
 	licenseFileRe = regexp.MustCompile(
-		fmt.Sprintf("^(%s)(%s)$",
-			strings.Join(fileNames, "|"),
+		fmt.Sprintf("(^(|.*[-_.])li[cs]en[cs]e(|[-_.].*)$)|(^(%s)(%s)$)",
+			strings.Join(alternativeLicenseFileNames, "|"),
 			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 
 	readmeFileRe = regexp.MustCompile(fmt.Sprintf("^readme(%s)$",
