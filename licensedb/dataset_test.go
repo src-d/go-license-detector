@@ -1,4 +1,4 @@
-package ld
+package licensedb
 
 import (
 	"archive/zip"
@@ -61,7 +61,7 @@ func TestDataset(t *testing.T) {
 		}(project, files)
 	}
 	wg.Wait()
-	assert.True(t, len(licenses) >= 789)
+	assert.True(t, len(licenses) >= 817)
 	// the rest len(projects) - 902 do not contain any license information
 	fmt.Printf("%d %d %d%%\n", len(licenses), 902, (100 * len(licenses)) / 902)
 }

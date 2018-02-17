@@ -1,4 +1,4 @@
-package ld
+package licensedb
 
 import (
 	"testing"

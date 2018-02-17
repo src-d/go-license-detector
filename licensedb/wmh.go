@@ -1,10 +1,11 @@
-package ld
+package licensedb
 
 import (
 	"math"
 
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
+	"fmt"
 )
 
 const maxUint16 = 65536
@@ -12,6 +13,9 @@ const maxUint16 = 65536
 // WeightedMinHasher calculates Weighted MinHash-es.
 // https://ekzhu.github.io/datasketch/weightedminhash.html
 type WeightedMinHasher struct {
+	// Size of each hash element in bits. Supported values are 16, 32 and 64.
+	Bitness    int
+
 	dim        int
 	sampleSize int
 	rs         [][]float32
@@ -26,7 +30,7 @@ type WeightedMinHasher struct {
 func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHasher {
 	randSrc := rand.New(rand.NewSource(uint64(seed)))
 	gammaGen := distuv.Gamma{Alpha: 2, Beta: 1, Src: randSrc}
-	hasher := &WeightedMinHasher{dim: dim, sampleSize: sampleSize}
+	hasher := &WeightedMinHasher{Bitness: 64, dim: dim, sampleSize: sampleSize}
 	hasher.rs = make([][]float32, sampleSize)
 	for y := 0; y < sampleSize; y++ {
 		arr := make([]float32, dim)
@@ -82,7 +86,16 @@ func (wmh *WeightedMinHasher) Hash(values []float32, indices []int) []uint64 {
 			}
 		}
 		// hashvalues[i][0], hashvalues[i][1] = k, int(t[k])
-		hashvalues[s] = uint64(k) | (uint64(minT) << 32)
+		switch wmh.Bitness {
+		case 64:
+			hashvalues[s] = uint64(uint64(k) | (uint64(minT) << 32))
+		case 32:
+			hashvalues[s] = uint64(uint32(k) | (uint32(minT) << 16))
+		case 16:
+			hashvalues[s] = uint64(uint16(k) | (uint16(minT) << 8))
+		default:
+			panic(fmt.Sprintf("unsupported bitness value: %d", wmh.Bitness))
+		}
 	}
 	return hashvalues
 }

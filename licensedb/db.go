@@ -1,4 +1,4 @@
-package ld
+package licensedb
 
 import (
 	"archive/tar"
@@ -112,12 +112,13 @@ func (db *LicenseDatabase) Load() {
 		db.tokens[token] = i
 		db.docfreqs[i] = docfreqs[token]
 	}
-	db.lsh = minhashlsh.NewMinhashLSH64(numHashes, lshSimilarityThreshold)
+	db.lsh = minhashlsh.NewMinhashLSH32(numHashes, lshSimilarityThreshold)
 	if db.Debug {
 		k, l := db.lsh.Params()
 		println("LSH:", k, l)
 	}
 	db.hasher = NewWeightedMinHasher(len(uniqueTokens), numHashes, 7)
+	db.hasher.Bitness = 32
 	db.nameSubstrings = map[string][]substring{}
 	db.nameSubstringSizes = map[string]int{}
 	for key, tokens := range tokenFreqs {

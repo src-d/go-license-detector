@@ -3,7 +3,7 @@
 // licenses.tar
 // DO NOT EDIT!
 
-package ld
+package licensedb
 
 import (
 	"bytes"
