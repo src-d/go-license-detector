@@ -1,3 +1,6 @@
+// license-detector prints the most probable licenses for a repository
+// given either its path in the local file system or a URL pointing to
+// the repository.
 package main
 
 import (
@@ -11,7 +14,7 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
-	"gopkg.in/src-d/go-license-detector.v1"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb"
 	"sync"
 )
 
@@ -99,7 +102,7 @@ func formatText(results []analysisResult) {
 }
 
 func getLicensesByDirectory(path string) (map[string]float32, error) {
-	return ld.InvestigateProjectLicenses(path)
+	return licensedb.InvestigateProjectLicenses(path)
 }
 
 func getLicensesByURL(url string) (map[string]float32, error) {
@@ -127,7 +130,7 @@ func getLicensesByURL(url string) (map[string]float32, error) {
 		files[file.Name] = file
 		return nil
 	})
-	return ld.InvestigateFilesLicenses(fileNames, func(file string) (string, error) {
+	return licensedb.InvestigateFilesLicenses(fileNames, func(file string) (string, error) {
 		return files[file].Contents()
 	})
 }
