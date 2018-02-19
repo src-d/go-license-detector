@@ -1,4 +1,4 @@
-package licensedb
+package processors
 
 import (
 	"bytes"
@@ -99,10 +99,10 @@ func parseHTMLEntity(entName []byte) []byte {
 	}
 }
 
-// PreprocessHTML converts HTML to plain text. E.g. it rips all the tags.
-func PreprocessHTML(htmlSource string) string {
+// HTML converts HTML to plain text. E.g. it rips all the tags.
+func HTML(htmlSource []byte) []byte {
 	result := &bytes.Buffer{}
-	doc := html.NewTokenizer(strings.NewReader(htmlSource))
+	doc := html.NewTokenizer(bytes.NewReader(htmlSource))
 	skip := false
 	for token := doc.Next(); token != html.ErrorToken; token = doc.Next() {
 		tagName, _ := doc.TagName()
@@ -128,5 +128,5 @@ func PreprocessHTML(htmlSource string) string {
 			}
 		}
 	}
-	return result.String()
+	return result.Bytes()
 }

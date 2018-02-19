@@ -2,7 +2,7 @@ GOPATH ?= $(shell go env GOPATH)
 SPDX_DATA_VERSION ?= 3.0
 
 bindata.go: licenses.tar $(GOPATH)/bin/go-bindata
-	$(GOPATH)/bin/go-bindata -pkg ld licenses.tar
+	$(GOPATH)/bin/go-bindata -pkg assets -o licensedb/internal/assets/bindata.go licenses.tar
 	rm licenses.tar
 
 licenses.tar: license-list-data.tar.gz

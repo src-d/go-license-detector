@@ -1,4 +1,4 @@
-package licensedb
+package normalize
 
 import (
 	"regexp"
@@ -72,15 +72,15 @@ var (
 	trademarkRe = regexp.MustCompile("™|\\(tm\\)|trademark")
 
 	// extra cleanup
-	brokenLinkRe = regexp.MustCompile("http s ://")
-	urlCleanupRe = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
+	brokenLinkRe    = regexp.MustCompile("http s ://")
+	urlCleanupRe    = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
 	copyrightLineRe = regexp.MustCompile("(?m)^©.*\n")
 )
 
-// NormalizeLicenseText makes a license text ready for analysis.
+// LicenseText makes a license text ready for analysis.
 // It follows SPDX guidelines at
 // https://spdx.org/spdx-license-list/matching-guidelines
-func NormalizeLicenseText(text string, strict bool) string {
+func LicenseText(text string, strict bool) string {
 	// Line endings
 	text = lineEndingsRe.ReplaceAllString(text, "\n")
 
