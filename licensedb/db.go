@@ -10,12 +10,16 @@ import (
 
 	"github.com/ekzhu/minhash-lsh"
 	"github.com/sergi/go-diff/diffmatchpatch"
+
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/assets"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/normalize"
+	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/wmh"
 )
 
-// LicenseDatabase holds the license texts, their hashes and the hashtables to query for nearest
+// database holds the license texts, their hashes and the hashtables to query for nearest
 // neighbors.
-type LicenseDatabase struct {
-	Debug bool
+type database struct {
+	debug bool
 
 	// license name -> text
 	licenseTexts map[string]string
@@ -26,7 +30,7 @@ type LicenseDatabase struct {
 	// Weighted MinHash hashtables
 	lsh *minhashlsh.MinhashLSH
 	// turns a license text into a hash
-	hasher *WeightedMinHasher
+	hasher *wmh.WeightedMinHasher
 	// part of license name -> list of containing license names
 	nameSubstrings map[string][]substring
 	// number of substrings per license
@@ -34,29 +38,30 @@ type LicenseDatabase struct {
 }
 
 type substring struct {
-	Value string
-	Count int
+	value string
+	count int
 }
 
 const (
-	numHashes              = 154
+	numHashes              = 100
 	lshSimilarityThreshold = 0.75
 )
 
 // Length returns the number of registered licenses.
-func (db LicenseDatabase) Length() int {
+func (db database) Length() int {
 	return len(db.licenseTexts)
 }
 
 // VocabularySize returns the number of unique unigrams.
-func (db LicenseDatabase) VocabularySize() int {
+func (db database) VocabularySize() int {
 	return len(db.tokens)
 }
 
 // Load takes the licenses from the embedded storage, normalizes, hashes them and builds the
 // LSH hashtables.
-func (db *LicenseDatabase) Load() {
-	tarBytes, err := Asset("licenses.tar")
+func loadLicenses() *database {
+	db := &database{}
+	tarBytes, err := assets.Asset("licenses.tar")
 	if err != nil {
 		panic("failed to load licenses.tar from the assets: " + err.Error())
 	}
@@ -76,7 +81,7 @@ func (db *LicenseDatabase) Load() {
 		if int64(readSize) != header.Size {
 			panic("failed to load licenses.tar from the assets: " + header.Name + ": incomplete read")
 		}
-		db.licenseTexts[key] = NormalizeLicenseText(string(text), false)
+		db.licenseTexts[key] = normalize.LicenseText(string(text), false)
 	}
 	tokenFreqs := map[string]map[string]int{}
 	for key, text := range db.licenseTexts {
@@ -84,10 +89,9 @@ func (db *LicenseDatabase) Load() {
 		myUniqueTokens := map[string]int{}
 		tokenFreqs[key] = myUniqueTokens
 		for _, line := range lines {
-			for _, token := range strings.Split(line, " ") {
-				if len(token) > 0 {
-					myUniqueTokens[token]++
-				}
+			tokens := strings.Split(line, " ")
+			for _, token := range tokens {
+				myUniqueTokens[token]++
 			}
 		}
 	}
@@ -112,13 +116,12 @@ func (db *LicenseDatabase) Load() {
 		db.tokens[token] = i
 		db.docfreqs[i] = docfreqs[token]
 	}
-	db.lsh = minhashlsh.NewMinhashLSH32(numHashes, lshSimilarityThreshold)
-	if db.Debug {
+	db.lsh = minhashlsh.NewMinhashLSH64(numHashes, lshSimilarityThreshold)
+	if db.debug {
 		k, l := db.lsh.Params()
 		println("LSH:", k, l)
 	}
-	db.hasher = NewWeightedMinHasher(len(uniqueTokens), numHashes, 7)
-	db.hasher.Bitness = 32
+	db.hasher = wmh.NewWeightedMinHasher(len(uniqueTokens), numHashes, 7)
 	db.nameSubstrings = map[string][]substring{}
 	db.nameSubstringSizes = map[string]int{}
 	for key, tokens := range tokenFreqs {
@@ -138,21 +141,22 @@ func (db *LicenseDatabase) Load() {
 		parts := splitLicenseName(key)
 		db.nameSubstringSizes[key] = len(parts)
 		for _, part := range parts {
-			list := db.nameSubstrings[part.Value]
+			list := db.nameSubstrings[part.value]
 			if list == nil {
 				list = []substring{}
 			}
-			list = append(list, substring{Value: key, Count: part.Count})
-			db.nameSubstrings[part.Value] = list
+			list = append(list, substring{value: key, count: part.count})
+			db.nameSubstrings[part.value] = list
 		}
 	}
 	db.lsh.Index()
+	return db
 }
 
 // QueryLicenseText returns the most similar registered licenses.
-func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
-	normalized := NormalizeLicenseText(text, false)
-	if db.Debug {
+func (db *database) QueryLicenseText(text string) map[string]float32 {
+	normalized := normalize.LicenseText(text, false)
+	if db.debug {
 		println(normalized)
 	}
 	tokens := map[int]int{}
@@ -160,9 +164,6 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 	oovRune := rune(len(db.tokens))
 	for _, line := range strings.Split(normalized, "\n") {
 		for _, token := range strings.Split(line, " ") {
-			if len(token) == 0 {
-				continue
-			}
 			if index, exists := db.tokens[token]; exists {
 				tokens[index]++
 				myRunes = append(myRunes, rune(index))
@@ -192,21 +193,18 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 		yourRunes := make([]rune, 0, len(text)/6)
 		for _, line := range strings.Split(text, "\n") {
 			for _, token := range strings.Split(line, " ") {
-				if len(token) > 0 {
-					yourRunes = append(yourRunes, rune(db.tokens[token]))
-				}
+				yourRunes = append(yourRunes, rune(db.tokens[token]))
 			}
 		}
 		dmp := diffmatchpatch.New()
 		diff := dmp.DiffMainRunes(myRunes, yourRunes, false)
 
-		if db.Debug {
+		if db.debug {
 			tokarr := make([]string, len(db.tokens)+1)
 			for key, val := range db.tokens {
 				tokarr[val] = key
 			}
 			tokarr[len(db.tokens)] = "!"
-			println(key + "↴")
 			println(dmp.DiffPrettyText(dmp.DiffCharsToLines(diff, tokarr)))
 		}
 		distance := dmp.DiffLevenshtein(diff)
@@ -216,7 +214,7 @@ func (db *LicenseDatabase) QueryLicenseText(text string) map[string]float32 {
 }
 
 // QueryReadmeText tries to detect licenses mentioned in the README.
-func (db *LicenseDatabase) QueryReadmeText(text string) map[string]float32 {
+func (db *database) QueryReadmeText(text string) map[string]float32 {
 	return investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
 }
 

@@ -1,11 +1,11 @@
-package licensedb
+package wmh
 
 import (
 	"math"
 
+	"fmt"
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
-	"fmt"
 )
 
 const maxUint16 = 65536
@@ -14,13 +14,13 @@ const maxUint16 = 65536
 // https://ekzhu.github.io/datasketch/weightedminhash.html
 type WeightedMinHasher struct {
 	// Size of each hash element in bits. Supported values are 16, 32 and 64.
-	Bitness    int
+	Bitness int
 
 	dim        int
 	sampleSize int
 	rs         [][]float32
 	lnCs       [][]float32
-	betas      [][]uint16  // attempt to save some memory - [0, 1] is scaled to maxUint16
+	betas      [][]uint16 // attempt to save some memory - [0, 1] is scaled to maxUint16
 }
 
 // NewWeightedMinHasher initializes a new instance of WeightedMinHasher.

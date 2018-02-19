@@ -1,4 +1,4 @@
-package licensedb
+package processors
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPreprocessHTML(t *testing.T) {
+func TestHTML(t *testing.T) {
 	text := `<body><h1>Title<h1/>
 <p>some text</p>
 &nbsp;&copy;&hellip;
@@ -23,5 +23,5 @@ And a third one.
 blah blah LINK text proceeds
 
 hello
-`, PreprocessHTML(text))
+`, string(HTML([]byte(text))))
 }

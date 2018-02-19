@@ -2,11 +2,11 @@ package licensedb
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/jdkato/prose/chunk"
 	"github.com/jdkato/prose/tag"
 	"github.com/jdkato/prose/tokenize"
-	"strings"
 )
 
 var (
@@ -60,20 +60,20 @@ func investigateReadmeFile(
 		entity = licenseReadmeRe.ReplaceAllString(entity, "")
 		substrs := splitLicenseName(entity)
 		for _, substr := range substrs {
-			for _, match := range licenseNameParts[substr.Value] {
-				common := match.Count
-				if substr.Count < common {
-					common = substr.Count
+			for _, match := range licenseNameParts[substr.value] {
+				common := match.count
+				if substr.count < common {
+					common = substr.count
 				}
-				scores[match.Value] += common
+				scores[match.value] += common
 			}
 		}
 		// if the only reason a license matched is a single digit, drop it
 		for _, substr := range substrs {
-			if digitsRe.MatchString(substr.Value) && len(substr.Value) == 1 {
-				for _, match := range licenseNameParts[substr.Value] {
-					if scores[match.Value] == 1 {
-						delete(scores, match.Value)
+			if digitsRe.MatchString(substr.value) && len(substr.value) == 1 {
+				for _, match := range licenseNameParts[substr.value] {
+					if scores[match.value] == 1 {
+						delete(scores, match.value)
 					}
 				}
 			}
@@ -110,7 +110,7 @@ func splitLicenseName(name string) []substring {
 	result := make([]substring, len(counts))
 	i := 0
 	for key, val := range counts {
-		result[i] = substring{Value: key, Count: val}
+		result[i] = substring{value: key, count: val}
 		i++
 	}
 	return result
