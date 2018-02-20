@@ -43,7 +43,7 @@ type substring struct {
 }
 
 const (
-	numHashes              = 100
+	numHashes              = 154
 	lshSimilarityThreshold = 0.75
 )
 
@@ -68,6 +68,7 @@ func loadLicenses() *database {
 	tarStream := bytes.NewBuffer(tarBytes)
 	archive := tar.NewReader(tarStream)
 	db.licenseTexts = map[string]string{}
+	tokenFreqs := map[string]map[string]int{}
 	for header, err := archive.Next(); err != io.EOF; header, err = archive.Next() {
 		if len(header.Name) <= 6 {
 			continue
@@ -81,11 +82,10 @@ func loadLicenses() *database {
 		if int64(readSize) != header.Size {
 			panic("failed to load licenses.tar from the assets: " + header.Name + ": incomplete read")
 		}
-		db.licenseTexts[key] = normalize.LicenseText(string(text), false)
-	}
-	tokenFreqs := map[string]map[string]int{}
-	for key, text := range db.licenseTexts {
-		lines := strings.Split(text, "\n")
+		normedText := normalize.LicenseText(string(text), normalize.Moderate)
+		db.licenseTexts[key] = normedText
+		normedText = normalize.Relax(normedText)
+		lines := strings.Split(normedText, "\n")
 		myUniqueTokens := map[string]int{}
 		tokenFreqs[key] = myUniqueTokens
 		for _, line := range lines {
@@ -155,20 +155,16 @@ func loadLicenses() *database {
 
 // QueryLicenseText returns the most similar registered licenses.
 func (db *database) QueryLicenseText(text string) map[string]float32 {
-	normalized := normalize.LicenseText(text, false)
+	normalizedModerate := normalize.LicenseText(text, normalize.Moderate)
+	normalizedRelaxed := normalize.Relax(normalizedModerate)
 	if db.debug {
-		println(normalized)
+		println(normalizedModerate)
 	}
 	tokens := map[int]int{}
-	myRunes := make([]rune, 0, len(normalized)/6)
-	oovRune := rune(len(db.tokens))
-	for _, line := range strings.Split(normalized, "\n") {
+	for _, line := range strings.Split(normalizedRelaxed, "\n") {
 		for _, token := range strings.Split(line, " ") {
 			if index, exists := db.tokens[token]; exists {
 				tokens[index]++
-				myRunes = append(myRunes, rune(index))
-			} else if len(myRunes) == 0 || myRunes[len(myRunes)-1] != oovRune {
-				myRunes = append(myRunes, oovRune)
 			}
 		}
 	}
@@ -191,11 +187,30 @@ func (db *database) QueryLicenseText(text string) map[string]float32 {
 		key := keyint.(string)
 		text := db.licenseTexts[key]
 		yourRunes := make([]rune, 0, len(text)/6)
+		vocabulary := map[string]int{}
 		for _, line := range strings.Split(text, "\n") {
 			for _, token := range strings.Split(line, " ") {
-				yourRunes = append(yourRunes, rune(db.tokens[token]))
+				index, exists := vocabulary[token]
+				if !exists {
+					index = len(vocabulary)
+					vocabulary[token] = index
+				}
+				yourRunes = append(yourRunes, rune(index))
 			}
 		}
+
+		oovRune := rune(len(vocabulary))
+		myRunes := make([]rune, 0, len(normalizedModerate)/6)
+		for _, line := range strings.Split(normalizedModerate, "\n") {
+			for _, token := range strings.Split(line, " ") {
+				if index, exists := vocabulary[token]; exists {
+					myRunes = append(myRunes, rune(index))
+				} else if len(myRunes) == 0 || myRunes[len(myRunes)-1] != oovRune {
+					myRunes = append(myRunes, oovRune)
+				}
+			}
+		}
+
 		dmp := diffmatchpatch.New()
 		diff := dmp.DiffMainRunes(myRunes, yourRunes, false)
 

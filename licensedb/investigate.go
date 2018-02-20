@@ -66,7 +66,7 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 		} else if pureLicenseFileRe.MatchString(strings.ToLower(file.Name)) {
 			// "license" directory, let's look inside
 			subfiles, err := fs.ReadDir(file.Name)
-			if err != nil {
+			if err == nil {
 				for _, subfile := range subfiles {
 					if !subfile.IsDir {
 						fileNames = append(fileNames, paths.Join(file.Name, subfile.Name))
