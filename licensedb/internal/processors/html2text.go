@@ -121,6 +121,8 @@ func HTML(htmlSource []byte) []byte {
 		result.Write(text)
 		if string(tagName) == "br" {
 			result.WriteRune('\n')
+		} else if string(tagName) == "hr" {
+			result.WriteString("---")
 		} else if htmlHeaderRe.Match(tagName) && doc.Token().Type == html.EndTagToken {
 			last := result.Bytes()[result.Len()-1]
 			if !marksRe.MatchString(string(last)) {

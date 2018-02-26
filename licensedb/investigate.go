@@ -42,7 +42,7 @@ var (
 	}
 
 	licenseFileRe = regexp.MustCompile(
-		fmt.Sprintf("(^(|.*[-_.])li[cs]en[cs]e(|[-_.].*)$)|(^(%s)(%s)$)",
+		fmt.Sprintf("(^(|.*[-_. ])li[cs]en[cs]e(s?)(|[-_. ].*)$)|(^(%s)(%s)$)",
 			strings.Join(alternativeLicenseFileNames, "|"),
 			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 

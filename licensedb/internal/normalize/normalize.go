@@ -1,9 +1,9 @@
 package normalize
 
 import (
+	"bytes"
 	"regexp"
 	"strings"
-	"bytes"
 	"unicode"
 
 	"golang.org/x/text/runes"
@@ -78,18 +78,26 @@ var (
 	trademarkRe = regexp.MustCompile("™|\\(tm\\)|trademark")
 
 	// extra cleanup
-	brokenLinkRe          = regexp.MustCompile("http s ://")
-	urlCleanupRe          = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
-	copyrightLineRe       = regexp.MustCompile("(?m)^©.*\n")
-	nonAlphaNumRe         = regexp.MustCompile("[^- \\na-z0-9]")
+	brokenLinkRe    = regexp.MustCompile("http s ://")
+	urlCleanupRe    = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
+	copyrightLineRe = regexp.MustCompile("(?m)^((©.*)|(all rights reserved(\\.)?)|(li[cs]en[cs]e))\n")
+	nonAlphaNumRe   = regexp.MustCompile("[^- \\na-z0-9]")
+
+	// used in Split()
+	splitRe = regexp.MustCompile("\\n\\s*[^a-zA-Z0-9_,()]{3,}\\s*\\n")
 )
 
+// Strictness represents the aggressiveness of the performed normalization. The bigger the number,
+// the more aggressive. See `Enforced`, `Moderate` and `Relaxed`.
 type Strictness int
 
 const (
+	// Enforced is the strictest mode - only the official SPDX guidelines are applied.
 	Enforced Strictness = 0
+	// Moderate is equivalent to Enforced with some additional normalization: dots are removed, copyright lines too.
 	Moderate Strictness = 1
-	Relaxed  Strictness = 2
+	// Relaxed is the most powerful normalization, Moderate + Unicode normalization and all non-alphanumeric chars removed.
+	Relaxed Strictness = 2
 )
 
 // LicenseText makes a license text ready for analysis.
@@ -165,4 +173,14 @@ func Relax(text string) string {
 	text = nonAlphaNumRe.ReplaceAllString(text, "")
 	text = leadingWhitespaceRe.ReplaceAllString(text, "")
 	return text
+}
+
+// Split applies heuristics to split the text into several parts
+func Split(text string) []string {
+	result := []string{text}
+
+	// Always add the full text
+	result = append(result, splitRe.Split(text, -1)...)
+
+	return result
 }
