@@ -1,8 +1,14 @@
 package normalize
 
 import (
+	"bytes"
 	"regexp"
 	"strings"
+	"unicode"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var (
@@ -74,13 +80,30 @@ var (
 	// extra cleanup
 	brokenLinkRe    = regexp.MustCompile("http s ://")
 	urlCleanupRe    = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
-	copyrightLineRe = regexp.MustCompile("(?m)^©.*\n")
+	copyrightLineRe = regexp.MustCompile("(?m)^((©.*)|(all rights reserved(\\.)?)|(li[cs]en[cs]e))\n")
+	nonAlphaNumRe   = regexp.MustCompile("[^- \\na-z0-9]")
+
+	// used in Split()
+	splitRe = regexp.MustCompile("\\n\\s*[^a-zA-Z0-9_,()]{3,}\\s*\\n")
+)
+
+// Strictness represents the aggressiveness of the performed normalization. The bigger the number,
+// the more aggressive. See `Enforced`, `Moderate` and `Relaxed`.
+type Strictness int
+
+const (
+	// Enforced is the strictest mode - only the official SPDX guidelines are applied.
+	Enforced Strictness = 0
+	// Moderate is equivalent to Enforced with some additional normalization: dots are removed, copyright lines too.
+	Moderate Strictness = 1
+	// Relaxed is the most powerful normalization, Moderate + Unicode normalization and all non-alphanumeric chars removed.
+	Relaxed Strictness = 2
 )
 
 // LicenseText makes a license text ready for analysis.
 // It follows SPDX guidelines at
 // https://spdx.org/spdx-license-list/matching-guidelines
-func LicenseText(text string, strict bool) string {
+func LicenseText(text string, strictness Strictness) string {
 	// Line endings
 	text = lineEndingsRe.ReplaceAllString(text, "\n")
 
@@ -112,12 +135,52 @@ func LicenseText(text string, strict bool) string {
 	// fix URLs in <> - erase the decoration
 	text = urlCleanupRe.ReplaceAllString(text, "$1")
 
-	if !strict {
+	// collapse several non-alphanumeric characters
+	{
+		buffer := &bytes.Buffer{}
+		back := '\x00'
+		for _, char := range text {
+			if !unicode.IsLetter(char) && !unicode.IsDigit(char) && back == char {
+				continue
+			}
+			back = char
+			buffer.WriteRune(char)
+		}
+		text = buffer.String()
+	}
+
+	if strictness > Enforced {
 		// there are common mismatches because of trailing dots
 		text = strings.Replace(text, ".", "", -1)
+		// usually copyright lines are custom and occur multiple times
 		text = copyrightLineRe.ReplaceAllString(text, "")
 	}
+
+	if strictness > Moderate {
+		return Relax(text)
+	}
+
 	text = leadingWhitespaceRe.ReplaceAllString(text, "")
 
 	return text
+}
+
+// Relax applies very aggressive normalization rules to text.
+func Relax(text string) string {
+	text, _, _ = transform.String(
+		transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
+		text)
+	text = nonAlphaNumRe.ReplaceAllString(text, "")
+	text = leadingWhitespaceRe.ReplaceAllString(text, "")
+	return text
+}
+
+// Split applies heuristics to split the text into several parts
+func Split(text string) []string {
+	result := []string{text}
+
+	// Always add the full text
+	result = append(result, splitRe.Split(text, -1)...)
+
+	return result
 }
