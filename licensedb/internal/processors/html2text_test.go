@@ -20,7 +20,7 @@ some text
  ©…
 Another title.
 And a third one.
-blah blah LINK text proceeds
+blah blah wow://LINK text proceeds
 
 hello
 `, string(HTML([]byte(text))))

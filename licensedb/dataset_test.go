@@ -31,7 +31,12 @@ func TestDataset(t *testing.T) {
 		}(project)
 	}
 	wg.Wait()
-	assert.True(t, len(licenses) >= 848)
+	assert.True(t, len(licenses) >= 864)
 	// the rest len(projects) - 902 do not contain any license information
 	fmt.Printf("%d %d %d%%\n", len(licenses), 902, (100*len(licenses))/902)
+	/*for _, project := range projects {
+		if _, exists := licenses[project.Name]; !exists {
+			println(project.Name)
+		}
+	}*/
 }

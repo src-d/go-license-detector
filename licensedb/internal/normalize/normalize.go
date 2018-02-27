@@ -84,7 +84,7 @@ var (
 	nonAlphaNumRe   = regexp.MustCompile("[^- \\na-z0-9]")
 
 	// used in Split()
-	splitRe = regexp.MustCompile("\\n\\s*[^a-zA-Z0-9_,()]{3,}\\s*\\n")
+	splitRe = regexp.MustCompile("(\\n\\s*[^a-zA-Z0-9_,()]{3,}\\s*\\n)|\\n{3,}")
 )
 
 // Strictness represents the aggressiveness of the performed normalization. The bigger the number,
