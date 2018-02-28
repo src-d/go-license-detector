@@ -3,7 +3,6 @@ package licensedb
 import (
 	"errors"
 	"fmt"
-	"os"
 	paths "path"
 	"regexp"
 	"strings"
@@ -170,10 +169,4 @@ func InvestigateReadmeTexts(texts [][]byte) map[string]float32 {
 // names found with Named Entity Recognition from NLP.
 func InvestigateReadmeText(text []byte) map[string]float32 {
 	return globalLicenseDatabase.QueryReadmeText(string(text))
-}
-
-func init() {
-	if os.Getenv("LICENSE_DEBUG") != "" {
-		globalLicenseDatabase.debug = true
-	}
 }

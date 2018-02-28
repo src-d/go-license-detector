@@ -16,7 +16,7 @@ var (
 	// 3.1.1 All whitespace should be treated as a single blank space.
 	whitespaceRe         = regexp.MustCompile("[\\t\\f\\r              　​]+")
 	trailingWhitespaceRe = regexp.MustCompile("(?m)[\\t\\f\\r              　​]$")
-	leadingWhitespaceRe  = regexp.MustCompile("(?m)^[\\t\\f\\r              　​]")
+	leadingWhitespaceRe  = regexp.MustCompile("(?m)^(( (\\n?))|\\n)")
 	// 5.1.2 Hyphens, Dashes  Any hyphen, dash, en dash, em dash, or other variation should be
 	// considered equivalent.
 	punctuationRe = regexp.MustCompile("[-‒–—―⁓⸺⸻~˗‐‑⁃⁻₋−∼⎯⏤─➖𐆑֊﹘﹣－]+")
@@ -84,7 +84,7 @@ var (
 	nonAlphaNumRe   = regexp.MustCompile("[^- \\na-z0-9]")
 
 	// used in Split()
-	splitRe = regexp.MustCompile("(\\n\\s*[^a-zA-Z0-9_,()]{3,}\\s*\\n)|\\n{3,}")
+	splitRe = regexp.MustCompile("\\n\\s*[^a-zA-Z0-9_,()]{3,}\\s*\\n")
 )
 
 // Strictness represents the aggressiveness of the performed normalization. The bigger the number,
@@ -167,9 +167,12 @@ func LicenseText(text string, strictness Strictness) string {
 
 // Relax applies very aggressive normalization rules to text.
 func Relax(text string) string {
-	text, _, _ = transform.String(
-		transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC),
-		text)
+	buffer := &bytes.Buffer{}
+	writer := transform.NewWriter(
+		buffer, transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC))
+	writer.Write([]byte(text))
+	writer.Close()
+	text = buffer.String()
 	text = nonAlphaNumRe.ReplaceAllString(text, "")
 	text = leadingWhitespaceRe.ReplaceAllString(text, "")
 	return text
@@ -180,7 +183,9 @@ func Split(text string) []string {
 	result := []string{text}
 
 	// Always add the full text
-	result = append(result, splitRe.Split(text, -1)...)
-
+	splitted := splitRe.Split(text, -1)
+	if len(splitted) > 1 {
+		result = append(result, splitted...)
+	}
 	return result
 }

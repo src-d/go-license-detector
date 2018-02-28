@@ -11,6 +11,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
@@ -74,8 +75,13 @@ type match struct {
 
 func process(arg string) ([]match, error) {
 	newFiler := filer.FromDirectory
-	if _, err := url.Parse(arg); err == nil {
-		newFiler = filer.FromGitURL
+	fi, err := os.Stat(arg)
+	if err != nil {
+		if _, err := url.Parse(arg); err == nil {
+			newFiler = filer.FromGitURL
+		}
+	} else if !fi.IsDir() {
+		return nil, errors.Errorf("%s is not a directory", arg)
 	}
 
 	resolvedFiler, err := newFiler(arg)
