@@ -16,6 +16,7 @@ var (
 	// 3.1.1 All whitespace should be treated as a single blank space.
 	whitespaceRe         = regexp.MustCompile("[\\t\\f\\r              　​]+")
 	trailingWhitespaceRe = regexp.MustCompile("(?m)[\\t\\f\\r              　​]$")
+	licenseHeaderRe      = regexp.MustCompile("(licen[cs]e)\\.?\\n\\n")
 	leadingWhitespaceRe  = regexp.MustCompile("(?m)^(( (\\n?))|\\n)")
 	// 5.1.2 Hyphens, Dashes  Any hyphen, dash, en dash, em dash, or other variation should be
 	// considered equivalent.
@@ -107,13 +108,14 @@ func LicenseText(text string, strictness Strictness) string {
 	// Line endings
 	text = lineEndingsRe.ReplaceAllString(text, "\n")
 
+	// 4. Capitalization
+	text = strings.ToLower(text)
+
 	// 3. Whitespace
 	text = whitespaceRe.ReplaceAllString(text, " ")
 	text = trailingWhitespaceRe.ReplaceAllString(text, "")
+	text = licenseHeaderRe.ReplaceAllString(text, "$1\nthisislikelyalicenseheaderplaceholder\n")
 	text = leadingWhitespaceRe.ReplaceAllString(text, "")
-
-	// 4. Capitalization
-	text = strings.ToLower(text)
 
 	// 5. Punctuation
 	text = punctuationRe.ReplaceAllString(text, "-")
@@ -161,6 +163,7 @@ func LicenseText(text string, strictness Strictness) string {
 	}
 
 	text = leadingWhitespaceRe.ReplaceAllString(text, "")
+	text = strings.Replace(text, "thisislikelyalicenseheaderplaceholder", "", -1)
 
 	return text
 }

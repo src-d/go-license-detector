@@ -17,8 +17,8 @@ var (
 	digitsRe            = regexp.MustCompile("[0-9]+")
 )
 
-// investigateReadmeFile is the implementation of InvestigateReadmeText.
-// It takes two additional arguments: licenseNameParts and licenseNameSizes.
+// investigateReadmeFile uses NER to match license name mentions.
+// It takes two arguments: licenseNameParts and licenseNameSizes.
 // The idea is to map substrings to real licenses, and the confidence is
 // <the number of matches> / <overall number of substrings>.
 func investigateReadmeFile(
@@ -56,7 +56,7 @@ func investigateReadmeFile(
 		if garbageReadmeRe.MatchString(entity) {
 			continue
 		}
-		scores := map[string]int{}
+		scores := map[string]map[string]int{}
 		entity = licenseReadmeRe.ReplaceAllString(entity, "")
 		substrs := splitLicenseName(entity)
 		for _, substr := range substrs {
@@ -65,21 +65,34 @@ func investigateReadmeFile(
 				if substr.count < common {
 					common = substr.count
 				}
-				scores[match.value] += common
+				matchSubstrs := scores[match.value]
+				if matchSubstrs == nil {
+					matchSubstrs = map[string]int{}
+					scores[match.value] = matchSubstrs
+				}
+				matchSubstrs[substr.value] = common
 			}
 		}
 		// if the only reason a license matched is a single digit, drop it
-		for _, substr := range substrs {
-			if digitsRe.MatchString(substr.value) && len(substr.value) == 1 {
-				for _, match := range licenseNameParts[substr.value] {
-					if scores[match.value] == 1 {
-						delete(scores, match.value)
+		toRemove := []string{}
+		for key, matchSubstrs := range scores {
+			if len(matchSubstrs) == 1 {
+				for substr := range matchSubstrs {
+					if digitsRe.MatchString(substr) {
+						toRemove = append(toRemove, key)
 					}
 				}
 			}
 		}
+		for _, key := range toRemove {
+			delete(scores, key)
+		}
 		for key, val := range scores {
-			confidence := float32(val) / float32(licenseNameSizes[key])
+			matchSize := 0
+			for _, n := range val {
+				matchSize += n
+			}
+			confidence := float32(matchSize) / float32(licenseNameSizes[key])
 			if candidates[key] < confidence {
 				candidates[key] = confidence
 			}

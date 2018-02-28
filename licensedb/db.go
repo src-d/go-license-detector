@@ -105,7 +105,7 @@ func loadLicenses() *database {
 	db.licenseTexts = map[string]string{}
 	tokenFreqs := map[string]map[string]int{}
 	firstLineWriter := &bytes.Buffer{}
-	firstLineWriter.WriteString("(^|\\n)(")
+	firstLineWriter.WriteString("(^|\\n)((.*licen[cs]e\\n\\n)|(")
 	for header, err := archive.Next(); err != io.EOF; header, err = archive.Next() {
 		if len(header.Name) <= 6 {
 			continue
@@ -144,7 +144,7 @@ func loadLicenses() *database {
 		println("Minimum license length:", db.minLicenseLength)
 	}
 	firstLineWriter.Truncate(firstLineWriter.Len()-1)
-	firstLineWriter.WriteRune(')')
+	firstLineWriter.WriteString("))")
 	db.firstLineRe = regexp.MustCompile(firstLineWriter.String())
 	docfreqs := map[string]int{}
 	for _, tokens := range tokenFreqs {
@@ -243,31 +243,38 @@ func (db *database) queryAbstract(text string) map[string]float32 {
 			endPos = len(normalizedModerate)
 		}
 		part := normalizedModerate[begPos:endPos]
+		prevMatch = match
+		prevPos = begPos
 		if float64(len(part)) < float64(db.minLicenseLength) *similarityThreshold {
-			prevMatch = match
-			prevPos = begPos
 			continue
 		}
 		newCandidates := db.queryAbstractNormed(part)
 		if len(newCandidates) == 0 {
-			prevMatch = match
-			prevPos = begPos
 			continue
 		}
-		prevMatch = ""
-		prevPos = -1
 		for key, val := range newCandidates {
 			if candidates[key] < val {
 				candidates[key] = val
 			}
 		}
 	}
+	db.addURLMatches(candidates, text)
+	return candidates
+}
+
+func (db *database) addURLMatches(candidates map[string]float32, text string) {
 	for key := range db.scanForURLs(text) {
-		if _, exists := candidates[key]; !exists {
-			candidates[key] = 1
+		if db.debug {
+			println("URL:", key)
+		}
+		if conf := candidates[key]; conf < similarityThreshold {
+			if conf == 0 {
+				candidates[key] = 1
+			} else {
+				candidates[key] = similarityThreshold
+			}
 		}
 	}
-	return candidates
 }
 
 func (db *database) queryAbstractNormed(normalizedModerate string) map[string]float32 {
@@ -334,7 +341,7 @@ func (db *database) queryAbstractNormed(normalizedModerate string) map[string]fl
 
 		if db.debug {
 			tokarr := make([]string, len(db.tokens)+1)
-			for key, val := range db.tokens {
+			for key, val := range vocabulary {
 				tokarr[val] = key
 			}
 			tokarr[len(db.tokens)] = "!"
@@ -372,11 +379,12 @@ func (db *database) scanForURLs(text string) map[string]bool {
 // QueryReadmeText tries to detect licenses mentioned in the README.
 func (db *database) QueryReadmeText(text string) map[string]float32 {
 	candidates := investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
-	for key := range db.scanForURLs(text) {
-		if _, exists := candidates[key]; !exists {
-			candidates[key] = 1
+	if db.debug {
+		for key, val := range candidates {
+			println("NLP", key, val)
 		}
 	}
+	db.addURLMatches(candidates, text)
 	return candidates
 }
 
