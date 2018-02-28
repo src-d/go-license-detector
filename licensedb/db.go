@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -27,10 +28,14 @@ type database struct {
 
 	// license name -> text
 	licenseTexts map[string]string
+	// minimum license text length
+	minLicenseLength int
 	// official license URLs
 	urls map[string]string
 	// all URLs joined
 	urlRe *regexp.Regexp
+	// first line of each license OR-ed - used to split
+	firstLineRe *regexp.Regexp
 	// unique unigrams -> index
 	tokens map[string]int
 	// document frequencies of the unigrams, indexes match with `tokens`
@@ -51,8 +56,8 @@ type substring struct {
 }
 
 const (
-	numHashes              = 154
-	lshSimilarityThreshold = 0.75
+	numHashes           = 154
+	similarityThreshold = 0.75
 )
 
 // Length returns the number of registered licenses.
@@ -69,6 +74,9 @@ func (db database) VocabularySize() int {
 // LSH hashtables.
 func loadLicenses() *database {
 	db := &database{}
+	if os.Getenv("LICENSE_DEBUG") != "" {
+		db.debug = true
+	}
 	urlCSVBytes, err := assets.Asset("urls.csv")
 	if err != nil {
 		log.Fatalf("failed to load urls.csv from the assets: %v", err)
@@ -96,6 +104,8 @@ func loadLicenses() *database {
 	archive := tar.NewReader(tarStream)
 	db.licenseTexts = map[string]string{}
 	tokenFreqs := map[string]map[string]int{}
+	firstLineWriter := &bytes.Buffer{}
+	firstLineWriter.WriteString("(^|\\n)(")
 	for header, err := archive.Next(); err != io.EOF; header, err = archive.Next() {
 		if len(header.Name) <= 6 {
 			continue
@@ -110,7 +120,15 @@ func loadLicenses() *database {
 			log.Fatalf("failed to load licenses.tar from the assets: %s: incomplete read", header.Name)
 		}
 		normedText := normalize.LicenseText(string(text), normalize.Moderate)
+		if db.minLicenseLength == 0 || db.minLicenseLength > len(normedText) {
+			db.minLicenseLength = len(normedText)
+		}
 		db.licenseTexts[key] = normedText
+		newLinePos := strings.Index(normedText, "\n")
+		if newLinePos >= 0 {
+			firstLineWriter.WriteString(regexp.QuoteMeta(normedText[:newLinePos]))
+			firstLineWriter.WriteRune('|')
+		}
 		normedText = normalize.Relax(normedText)
 		lines := strings.Split(normedText, "\n")
 		myUniqueTokens := map[string]int{}
@@ -122,6 +140,12 @@ func loadLicenses() *database {
 			}
 		}
 	}
+	if db.debug {
+		println("Minimum license length:", db.minLicenseLength)
+	}
+	firstLineWriter.Truncate(firstLineWriter.Len()-1)
+	firstLineWriter.WriteRune(')')
+	db.firstLineRe = regexp.MustCompile(firstLineWriter.String())
 	docfreqs := map[string]int{}
 	for _, tokens := range tokenFreqs {
 		for token := range tokens {
@@ -143,7 +167,7 @@ func loadLicenses() *database {
 		db.tokens[token] = i
 		db.docfreqs[i] = docfreqs[token]
 	}
-	db.lsh = minhashlsh.NewMinhashLSH64(numHashes, lshSimilarityThreshold)
+	db.lsh = minhashlsh.NewMinhashLSH64(numHashes, similarityThreshold)
 	if db.debug {
 		k, l := db.lsh.Params()
 		println("LSH:", k, l)
@@ -196,9 +220,63 @@ func (db *database) QueryLicenseText(text string) map[string]float32 {
 
 func (db *database) queryAbstract(text string) map[string]float32 {
 	normalizedModerate := normalize.LicenseText(text, normalize.Moderate)
+	titlePositions := db.firstLineRe.FindAllStringIndex(normalizedModerate, -1)
+	candidates := db.queryAbstractNormed(normalizedModerate)
+	var prevPos int
+	var prevMatch string
+	for i, titlePos := range titlePositions {
+		begPos := titlePos[0]
+		match := normalizedModerate[titlePos[0]:titlePos[1]]
+		if match[0] == '\n' {
+			match = match[1:]
+		}
+		if match == prevMatch {
+			begPos = prevPos
+		}
+		if normalizedModerate[begPos] == '\n' {
+			begPos++
+		}
+		var endPos int
+		if i < len(titlePositions) - 1 {
+			endPos = titlePositions[i + 1][0]
+		} else {
+			endPos = len(normalizedModerate)
+		}
+		part := normalizedModerate[begPos:endPos]
+		if float64(len(part)) < float64(db.minLicenseLength) *similarityThreshold {
+			prevMatch = match
+			prevPos = begPos
+			continue
+		}
+		newCandidates := db.queryAbstractNormed(part)
+		if len(newCandidates) == 0 {
+			prevMatch = match
+			prevPos = begPos
+			continue
+		}
+		prevMatch = ""
+		prevPos = -1
+		for key, val := range newCandidates {
+			if candidates[key] < val {
+				candidates[key] = val
+			}
+		}
+	}
+	for key := range db.scanForURLs(text) {
+		if _, exists := candidates[key]; !exists {
+			candidates[key] = 1
+		}
+	}
+	return candidates
+}
+
+func (db *database) queryAbstractNormed(normalizedModerate string) map[string]float32 {
 	normalizedRelaxed := normalize.Relax(normalizedModerate)
 	if db.debug {
+		println("\nqueryAbstractNormed --------\n")
 		println(normalizedModerate)
+		println("\n========\n")
+		println(normalizedRelaxed)
 	}
 	tokens := map[int]int{}
 	for _, line := range strings.Split(normalizedRelaxed, "\n") {
@@ -220,22 +298,15 @@ func (db *database) queryAbstract(text string) map[string]float32 {
 	}
 	found := db.lsh.Query(db.hasher.Hash(values, indices))
 	candidates := map[string]float32{}
-	defer func() {
-		for key := range db.scanForURLs(text) {
-			if _, exists := candidates[key]; !exists {
-				candidates[key] = 1
-			}
-		}
-	}()
 	if len(found) == 0 {
 		return candidates
 	}
 	for _, keyint := range found {
 		key := keyint.(string)
-		text := db.licenseTexts[key]
-		yourRunes := make([]rune, 0, len(text)/6)
+		licenseText := db.licenseTexts[key]
+		yourRunes := make([]rune, 0, len(licenseText)/6)
 		vocabulary := map[string]int{}
-		for _, line := range strings.Split(text, "\n") {
+		for _, line := range strings.Split(licenseText, "\n") {
 			for _, token := range strings.Split(line, " ") {
 				index, exists := vocabulary[token]
 				if !exists {
@@ -271,6 +342,17 @@ func (db *database) queryAbstract(text string) map[string]float32 {
 		}
 		distance := dmp.DiffLevenshtein(diff)
 		candidates[key] = float32(1) - float32(distance)/float32(len(myRunes))
+	}
+	weak := make([]string, 0, len(candidates))
+	for key, val := range candidates {
+		if val < similarityThreshold {
+			weak = append(weak, key)
+		}
+	}
+	if len(weak) < len(candidates) {
+		for _, key := range weak {
+			delete(candidates, key)
+		}
 	}
 	return candidates
 }
