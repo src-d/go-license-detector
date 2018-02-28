@@ -176,6 +176,7 @@
     "internal/gen",
     "internal/triegen",
     "internal/ucd",
+    "runes",
     "transform",
     "unicode/cldr",
     "unicode/norm"
@@ -290,6 +291,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aeb8860022d0202793a8979efddbdc264cdf27ecefcf594adaa42742457220ff"
+  inputs-digest = "657393658180736df7fd8195438b0ddb19079bbee8c6a797046db4c9519032e7"
   solver-name = "gps-cdcl"
   solver-version = 1
