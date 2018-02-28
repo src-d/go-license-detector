@@ -13,8 +13,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
-	"gopkg.in/src-d/go-license-detector.v1/licensedb"
-	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 )
 
 func main() {

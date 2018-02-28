@@ -63,7 +63,7 @@ license-detector https://github.com/src-d/go-git
 Library:
 
 ```go
-import "gopkg.in/src-d/go-license-detector.v1"
+import go-license-detector.v2
 
 func main() {
 	licenses, err := ld.InvestigateProjectLicenses("/path/to/project")
