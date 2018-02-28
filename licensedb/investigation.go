@@ -45,7 +45,7 @@ var (
 			strings.Join(alternativeLicenseFileNames, "|"),
 			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 
-	readmeFileRe = regexp.MustCompile(fmt.Sprintf("^readme(%s)$",
+	readmeFileRe = regexp.MustCompile(fmt.Sprintf("^(readme|guidelines)(%s)$",
 		strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 
 	pureLicenseFileRe = regexp.MustCompile("^li[cs]en[cs]e$")

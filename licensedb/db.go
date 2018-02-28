@@ -262,12 +262,23 @@ func (db *database) queryAbstract(text string) map[string]float32 {
 			}
 		}
 	}
+	db.addURLMatches(candidates, text)
+	return candidates
+}
+
+func (db *database) addURLMatches(candidates map[string]float32, text string) {
 	for key := range db.scanForURLs(text) {
-		if _, exists := candidates[key]; !exists {
-			candidates[key] = 1
+		if db.debug {
+			println("URL:", key)
+		}
+		if conf := candidates[key]; conf < similarityThreshold {
+			if conf == 0 {
+				candidates[key] = 1
+			} else {
+				candidates[key] = similarityThreshold
+			}
 		}
 	}
-	return candidates
 }
 
 func (db *database) queryAbstractNormed(normalizedModerate string) map[string]float32 {
@@ -372,11 +383,12 @@ func (db *database) scanForURLs(text string) map[string]bool {
 // QueryReadmeText tries to detect licenses mentioned in the README.
 func (db *database) QueryReadmeText(text string) map[string]float32 {
 	candidates := investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
-	for key := range db.scanForURLs(text) {
-		if _, exists := candidates[key]; !exists {
-			candidates[key] = 1
+	if db.debug {
+		for key, val := range candidates {
+			println("NLP", key, val)
 		}
 	}
+	db.addURLMatches(candidates, text)
 	return candidates
 }
 
