@@ -119,10 +119,18 @@ func HTML(htmlSource []byte) []byte {
 		text = htmlEntityRe.ReplaceAllFunc(text, parseHTMLEntity)
 		text = bytes.Replace(text, []byte("\u00a0"), []byte(" "), -1)
 		result.Write(text)
-		if string(tagName) == "br" {
+		strTagName := string(tagName)
+		if strTagName == "br" {
 			result.WriteRune('\n')
-		} else if string(tagName) == "hr" {
+		} else if strTagName == "hr" {
 			result.WriteString("---")
+		} else if strTagName == "a" {
+			for key, val, _ := doc.TagAttr(); key != nil; key, val, _ = doc.TagAttr() {
+				if string(key) == "href" {
+					result.Write(val)
+					break
+				}
+			}
 		} else if htmlHeaderRe.Match(tagName) && doc.Token().Type == html.EndTagToken {
 			last := result.Bytes()[result.Len()-1]
 			if !marksRe.MatchString(string(last)) {

@@ -84,7 +84,7 @@ func licensesTar() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "licenses.tar", size: 3655680, mode: os.FileMode(436), modTime: time.Unix(1519714600, 0)}
+	info := bindataFileInfo{name: "licenses.tar", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func urlsCsv() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "urls.csv", size: 27517, mode: os.FileMode(436), modTime: time.Unix(1519714601, 0)}
+	info := bindataFileInfo{name: "urls.csv", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

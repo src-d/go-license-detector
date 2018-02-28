@@ -3,7 +3,7 @@ SPDX_DATA_VERSION ?= 3.0
 
 licensedb/internal/assets/bindata.go: licenses.tar urls.csv $(GOPATH)/bin/go-bindata
 	rm -f license-list-data.tar.gz
-	$(GOPATH)/bin/go-bindata -pkg assets -o licensedb/internal/assets/bindata.go licenses.tar urls.csv
+	$(GOPATH)/bin/go-bindata -nometadata -pkg assets -o licensedb/internal/assets/bindata.go licenses.tar urls.csv
 	rm licenses.tar
 	rm urls.csv
 

@@ -97,7 +97,7 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 func ExtractLicenseFiles(files []string, fs filer.Filer) [][]byte {
 	candidates := [][]byte{}
 	for _, file := range files {
-		if licenseFileRe.MatchString(strings.ToLower(file)) {
+		if licenseFileRe.MatchString(strings.ToLower(paths.Base(file))) {
 			text, err := fs.ReadFile(file)
 			if err == nil {
 				if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
