@@ -143,7 +143,7 @@ func loadLicenses() *database {
 	if db.debug {
 		println("Minimum license length:", db.minLicenseLength)
 	}
-	firstLineWriter.Truncate(firstLineWriter.Len()-1)
+	firstLineWriter.Truncate(firstLineWriter.Len() - 1)
 	firstLineWriter.WriteString("))")
 	db.firstLineRe = regexp.MustCompile(firstLineWriter.String())
 	docfreqs := map[string]int{}
@@ -209,7 +209,7 @@ func (db *database) QueryLicenseText(text string) map[string]float32 {
 	parts := normalize.Split(text)
 	licenses := map[string]float32{}
 	for _, part := range parts {
-		for key, val := range db.queryAbstract(part) {
+		for key, val := range db.queryLicenseAbstract(part) {
 			if licenses[key] < val {
 				licenses[key] = val
 			}
@@ -218,10 +218,10 @@ func (db *database) QueryLicenseText(text string) map[string]float32 {
 	return licenses
 }
 
-func (db *database) queryAbstract(text string) map[string]float32 {
+func (db *database) queryLicenseAbstract(text string) map[string]float32 {
 	normalizedModerate := normalize.LicenseText(text, normalize.Moderate)
 	titlePositions := db.firstLineRe.FindAllStringIndex(normalizedModerate, -1)
-	candidates := db.queryAbstractNormed(normalizedModerate)
+	candidates := db.queryLicenseAbstractNormalized(normalizedModerate)
 	var prevPos int
 	var prevMatch string
 	for i, titlePos := range titlePositions {
@@ -237,18 +237,18 @@ func (db *database) queryAbstract(text string) map[string]float32 {
 			begPos++
 		}
 		var endPos int
-		if i < len(titlePositions) - 1 {
-			endPos = titlePositions[i + 1][0]
+		if i < len(titlePositions)-1 {
+			endPos = titlePositions[i+1][0]
 		} else {
 			endPos = len(normalizedModerate)
 		}
 		part := normalizedModerate[begPos:endPos]
 		prevMatch = match
 		prevPos = begPos
-		if float64(len(part)) < float64(db.minLicenseLength) *similarityThreshold {
+		if float64(len(part)) < float64(db.minLicenseLength)*similarityThreshold {
 			continue
 		}
-		newCandidates := db.queryAbstractNormed(part)
+		newCandidates := db.queryLicenseAbstractNormalized(part)
 		if len(newCandidates) == 0 {
 			continue
 		}
@@ -277,7 +277,7 @@ func (db *database) addURLMatches(candidates map[string]float32, text string) {
 	}
 }
 
-func (db *database) queryAbstractNormed(normalizedModerate string) map[string]float32 {
+func (db *database) queryLicenseAbstractNormalized(normalizedModerate string) map[string]float32 {
 	normalizedRelaxed := normalize.Relax(normalizedModerate)
 	if db.debug {
 		println("\nqueryAbstractNormed --------\n")

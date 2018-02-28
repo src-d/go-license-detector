@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"bytes"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/processors"
-	"bytes"
 )
 
 var (
@@ -18,10 +18,16 @@ var (
 
 	globalLicenseDatabase = loadLicenses()
 
-	// Base names of guessable license files - except all variants of LICENSE.
-	alternativeLicenseFileNames = []string{
+	// Base names of guessable license files
+	licenseFileNames = []string{
+		"li[cs]en[cs]e(s?)",
+		"legal",
 		"copy(left|right|ing)",
 		"unlicense",
+		"l?gpl([-_ v]?)(\\d\\.?\\d)?",
+		"bsd",
+		"mit",
+		"apache",
 	}
 
 	// License file extensions. Combined with the fileNames slice
@@ -42,14 +48,14 @@ var (
 	}
 
 	licenseFileRe = regexp.MustCompile(
-		fmt.Sprintf("(^(|.*[-_. ])li[cs]en[cs]e(s?)(|[-_. ].*)$)|(^(%s)(%s)$)",
-			strings.Join(alternativeLicenseFileNames, "|"),
-			strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
+		fmt.Sprintf("^(|.*[-_. ])(%s)(|[-_. ].*)$",
+			strings.Join(licenseFileNames, "|")))
 
 	readmeFileRe = regexp.MustCompile(fmt.Sprintf("^(readme|guidelines)(%s)$",
 		strings.Replace(strings.Join(fileExtensions, "|"), ".", "\\.", -1)))
 
-	pureLicenseFileRe = regexp.MustCompile("^li[cs]en[cs]e$")
+	pureLicenseFileRe = regexp.MustCompile(fmt.Sprintf(
+		"^(%s)$", strings.Join(licenseFileNames, "|")))
 )
 
 // Detect returns the most probable reference licenses matched for the given
@@ -76,19 +82,20 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 		}
 	}
 	candidates := ExtractLicenseFiles(fileNames, fs)
-	if len(candidates) == 0 {
-		// Plan B: take the README, find the section about the license and apply NER
-		candidates = ExtractReadmeFiles(fileNames, fs)
-		if len(candidates) == 0 {
-			return nil, ErrNoLicenseFound
-		}
-		licenses := InvestigateReadmeTexts(candidates)
-		if len(licenses) == 0 {
-			return nil, ErrNoLicenseFound
-		}
+	licenses := InvestigateLicenseTexts(candidates)
+	if len(licenses) > 0 {
 		return licenses, nil
 	}
-	return InvestigateLicenseTexts(candidates), nil
+	// Plan B: take the README, find the section about the license and apply NER
+	candidates = ExtractReadmeFiles(fileNames, fs)
+	if len(candidates) == 0 {
+		return nil, ErrNoLicenseFound
+	}
+	licenses = InvestigateReadmeTexts(candidates)
+	if len(licenses) == 0 {
+		return nil, ErrNoLicenseFound
+	}
+	return licenses, nil
 }
 
 // ExtractLicenseFiles returns the list of possible license texts.
