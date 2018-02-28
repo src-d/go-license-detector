@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
+	"os"
 )
 
 func TestDataset(t *testing.T) {
@@ -34,9 +35,11 @@ func TestDataset(t *testing.T) {
 	assert.True(t, len(licenses) >= 864)
 	// the rest len(projects) - 902 do not contain any license information
 	fmt.Printf("%d %d %d%%\n", len(licenses), 902, (100*len(licenses))/902)
-	/*for _, project := range projects {
-		if _, exists := licenses[project.Name]; !exists {
-			println(project.Name)
+	if os.Getenv("LICENSE_TEST_DEBUG") != "" {
+		for _, project := range projects {
+			if _, exists := licenses[project.Name]; !exists {
+				println(project.Name)
+			}
 		}
-	}*/
+	}
 }

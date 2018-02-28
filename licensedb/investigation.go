@@ -9,6 +9,7 @@ import (
 
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/processors"
+	"bytes"
 )
 
 var (
@@ -98,6 +99,14 @@ func ExtractLicenseFiles(files []string, fs filer.Filer) [][]byte {
 	for _, file := range files {
 		if licenseFileRe.MatchString(strings.ToLower(paths.Base(file))) {
 			text, err := fs.ReadFile(file)
+			if len(text) < 128 {
+				// e.g. https://github.com/Unitech/pm2/blob/master/LICENSE
+				realText, err := fs.ReadFile(string(bytes.TrimSpace(text)))
+				if err == nil {
+					file = string(bytes.TrimSpace(text))
+					text = realText
+				}
+			}
 			if err == nil {
 				if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
 					text = preprocessor(text)

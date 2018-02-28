@@ -105,7 +105,7 @@ func loadLicenses() *database {
 	db.licenseTexts = map[string]string{}
 	tokenFreqs := map[string]map[string]int{}
 	firstLineWriter := &bytes.Buffer{}
-	firstLineWriter.WriteString("(^|\\n)(")
+	firstLineWriter.WriteString("(^|\\n)((.*licen[cs]e\\n\\n)|(")
 	for header, err := archive.Next(); err != io.EOF; header, err = archive.Next() {
 		if len(header.Name) <= 6 {
 			continue
@@ -144,7 +144,7 @@ func loadLicenses() *database {
 		println("Minimum license length:", db.minLicenseLength)
 	}
 	firstLineWriter.Truncate(firstLineWriter.Len()-1)
-	firstLineWriter.WriteRune(')')
+	firstLineWriter.WriteString("))")
 	db.firstLineRe = regexp.MustCompile(firstLineWriter.String())
 	docfreqs := map[string]int{}
 	for _, tokens := range tokenFreqs {
@@ -243,19 +243,15 @@ func (db *database) queryAbstract(text string) map[string]float32 {
 			endPos = len(normalizedModerate)
 		}
 		part := normalizedModerate[begPos:endPos]
+		prevMatch = match
+		prevPos = begPos
 		if float64(len(part)) < float64(db.minLicenseLength) *similarityThreshold {
-			prevMatch = match
-			prevPos = begPos
 			continue
 		}
 		newCandidates := db.queryAbstractNormed(part)
 		if len(newCandidates) == 0 {
-			prevMatch = match
-			prevPos = begPos
 			continue
 		}
-		prevMatch = ""
-		prevPos = -1
 		for key, val := range newCandidates {
 			if candidates[key] < val {
 				candidates[key] = val
@@ -345,7 +341,7 @@ func (db *database) queryAbstractNormed(normalizedModerate string) map[string]fl
 
 		if db.debug {
 			tokarr := make([]string, len(db.tokens)+1)
-			for key, val := range db.tokens {
+			for key, val := range vocabulary {
 				tokarr[val] = key
 			}
 			tokarr[len(db.tokens)] = "!"
