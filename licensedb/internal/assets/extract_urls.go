@@ -32,7 +32,7 @@ func main() {
 			for _, url := range seeAlso.([]interface{}) {
 				id := data["licenseId"].(string)
 				strUrl := strings.TrimSpace(url.(string))
-				strUrl = strUrl[strings.Index(strUrl, "://"):]  // ignore http/https
+				strUrl = strUrl[strings.Index(strUrl, "://"):] // ignore http/https
 				if strings.HasSuffix(strUrl, "/legalcode") && strings.HasPrefix(id, "CC") {
 					strUrl = strUrl[:len(strUrl)-10]
 				}

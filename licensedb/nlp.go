@@ -32,9 +32,11 @@ func investigateReadmeFile(
 
 	// shoot in the dark. Is it a license text?
 	beginIndex := matches[0][0]
-	for ; beginIndex >= 1 && text[beginIndex-1:beginIndex+1] != "\n\n"; beginIndex-- {}
+	for ; beginIndex >= 1 && text[beginIndex-1:beginIndex+1] != "\n\n"; beginIndex-- {
+	}
 	endIndex := matches[len(matches)-1][1]
-	for ; endIndex < len(text) - 1 && text[endIndex:endIndex+2] != "\n\n"; endIndex++ {}
+	for ; endIndex < len(text)-1 && text[endIndex:endIndex+2] != "\n\n"; endIndex++ {
+	}
 	candidates := globalLicenseDatabase.QueryLicenseText(text[beginIndex:endIndex])
 
 	beginIndex = matches[0][0]

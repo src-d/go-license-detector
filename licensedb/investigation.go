@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"bytes"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/processors"
-	"bytes"
 )
 
 var (

@@ -143,7 +143,7 @@ func loadLicenses() *database {
 	if db.debug {
 		println("Minimum license length:", db.minLicenseLength)
 	}
-	firstLineWriter.Truncate(firstLineWriter.Len()-1)
+	firstLineWriter.Truncate(firstLineWriter.Len() - 1)
 	firstLineWriter.WriteString("))")
 	db.firstLineRe = regexp.MustCompile(firstLineWriter.String())
 	docfreqs := map[string]int{}
@@ -237,15 +237,15 @@ func (db *database) queryLicenseAbstract(text string) map[string]float32 {
 			begPos++
 		}
 		var endPos int
-		if i < len(titlePositions) - 1 {
-			endPos = titlePositions[i + 1][0]
+		if i < len(titlePositions)-1 {
+			endPos = titlePositions[i+1][0]
 		} else {
 			endPos = len(normalizedModerate)
 		}
 		part := normalizedModerate[begPos:endPos]
 		prevMatch = match
 		prevPos = begPos
-		if float64(len(part)) < float64(db.minLicenseLength) *similarityThreshold {
+		if float64(len(part)) < float64(db.minLicenseLength)*similarityThreshold {
 			continue
 		}
 		newCandidates := db.queryLicenseAbstractNormalized(part)
