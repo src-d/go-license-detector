@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"bytes"
-	"gopkg.in/src-d/go-license-detector.v1/licensedb/filer"
-	"gopkg.in/src-d/go-license-detector.v1/licensedb/internal/processors"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/processors"
 )
 
 var (
