@@ -10,11 +10,12 @@ import (
 )
 
 var (
-	licenseMarkReadmeRe = regexp.MustCompile("([Cc]opy(right|ing))|\\(c\\)|©|([Ll]icen[cs][ei])|released under")
+	licenseMarkReadmeRe = regexp.MustCompile("(?i)(copy(right|ing))|\\(c\\)|©|(licen[cs][ei])|released under")
 	garbageReadmeRe     = regexp.MustCompile("([Cc]opy(right|ing))|\\(c\\)|©")
 	licenseReadmeRe     = regexp.MustCompile("\\s*[Ll]icen[cs]e\\s*")
 	licenseNamePartRe   = regexp.MustCompile("([a-z]+)|([0-9]+)")
 	digitsRe            = regexp.MustCompile("[0-9]+")
+	disabledNamePartsRe = regexp.MustCompile("clause|or|only|deprecated|later")
 )
 
 // investigateReadmeFile uses NER to match license name mentions.
@@ -28,8 +29,16 @@ func investigateReadmeFile(
 	if len(matches) == 0 {
 		return map[string]float32{}
 	}
+
+	// shoot in the dark. Is it a license text?
 	beginIndex := matches[0][0]
-	endIndex := beginIndex + 50
+	for ; beginIndex >= 1 && text[beginIndex-1:beginIndex+1] != "\n\n"; beginIndex-- {}
+	endIndex := matches[len(matches)-1][1]
+	for ; endIndex < len(text) - 1 && text[endIndex:endIndex+2] != "\n\n"; endIndex++ {}
+	candidates := globalLicenseDatabase.QueryLicenseText(text[beginIndex:endIndex])
+
+	beginIndex = matches[0][0]
+	endIndex = beginIndex + 50
 	if len(matches) > 1 {
 		endIndex = matches[len(matches)-1][1]
 	} else {
@@ -51,7 +60,6 @@ func investigateReadmeFile(
 	suspectedText := text[beginIndex:endIndex]
 	suspectedWords := tokenize.TextToWords(suspectedText)
 	tagger := tag.NewPerceptronTagger()
-	candidates := map[string]float32{}
 	for _, entity := range chunk.Chunk(tagger.Tag(suspectedWords), chunk.TreebankNamedEntities) {
 		if garbageReadmeRe.MatchString(entity) {
 			continue
@@ -93,7 +101,7 @@ func investigateReadmeFile(
 				matchSize += n
 			}
 			confidence := float32(matchSize) / float32(licenseNameSizes[key])
-			if candidates[key] < confidence {
+			if candidates[key] < confidence && confidence >= 0.3 {
 				candidates[key] = confidence
 			}
 		}
@@ -111,7 +119,7 @@ func splitLicenseName(name string) []substring {
 				continue
 			}
 		}
-		if part == "clause" {
+		if disabledNamePartsRe.MatchString(part) {
 			continue
 		}
 		// BSD hack
