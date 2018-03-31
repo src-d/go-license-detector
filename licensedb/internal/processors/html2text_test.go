@@ -14,14 +14,16 @@ func TestHTML(t *testing.T) {
 <h3>And a third one.</h3>
 <span>blah blah</span> <a href="wow://">LINK</a> text proceeds<br>
 <script>here goes smth nasty<h4>even a title!</h4></script>hello
-<style>you should put styles in &lt;head&gt;</style></body>`
+<style>you should put styles in &lt;head&gt;</style>
+<a href="http://foo">http://foo</body>`
 	assert.Equal(t, `Title
 some text
  ©…
 Another title.
 And a third one.
-blah blah wow://LINK text proceeds
+blah blah wow:// LINK text proceeds
 
 hello
-`, string(HTML([]byte(text))))
+
+http://foo`, string(HTML([]byte(text))))
 }
