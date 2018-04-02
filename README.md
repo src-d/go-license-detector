@@ -76,6 +76,34 @@ On the [dataset](dataset.zip) of ~1000 most starred repositories on GitHub as of
 ([list](dataset.projects.gz)), **99%** of the licenses are detected.
 The analysis of detection failures is going in [FAILURES.md](FAILURES.md).
 
+Comparison to other projects on that dataset:
+
+|Detector|Detection rate|Time to scan, sec|
+|:-------|:----------------------------------------:|:-----------------------------------------|
+|[go-license-detector](https://github.com/src-d/go-license-detector)| 99%  (897/902) | 23 |
+|[benbalter/licensee](https://github.com/benbalter/licensee)| 75%  (673/902) | 111 |
+|[google/licenseclassifier](https://github.com/google/licenseclassifier)| 76%  (682/902) | 907 |
+|[boyter/lc](https://github.com/boyter/lc)| 88%  (797/902) | 548 |
+
+<details><summary>How this was measured</summary>
+<pre><code>$ cd $(go env GOPATH)/src/gopkg.in/src-d/go-license-detector.v2/licensedb
+$ mkdir dataset && cd dataset
+$ unzip ../dataset.zip
+$ # src-d/go-license-detector
+$ time license-detector * \
+  | grep -Pzo '\n[-0-9a-zA-Z]+\n\tno license' | grep -Pa '\tno ' | wc -l
+$ # benbalter/licensee
+$ time ls -1 | xargs -n1 -P4 licensee \
+  | grep -E "^License: Other" | wc -l
+$ # google/licenseclassifier
+$ time find -type f -print | xargs -n1 -P4 identify_license \
+  | cut -d/ -f2 | sort | uniq | wc -l
+$ # boyter/lc
+$ time lc . \
+  | grep -vE 'NOASSERTION|----|Directory' | cut -d" " -f1 | sort | uniq | wc -l
+</code></pre>
+</details>
+
 ## Regenerate binary data
 
 The SPDX licenses are included into the binary. To update them, run
