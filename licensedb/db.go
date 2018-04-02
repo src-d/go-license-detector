@@ -113,7 +113,7 @@ func loadLicenses() *database {
 		key := header.Name[2 : len(header.Name)-4]
 		text := make([]byte, header.Size)
 		readSize, readErr := archive.Read(text)
-		if readErr != nil {
+		if readErr != nil && readErr != io.EOF {
 			log.Fatalf("failed to load licenses.tar from the assets: %s: %v", header.Name, readErr)
 		}
 		if int64(readSize) != header.Size {
