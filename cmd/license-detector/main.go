@@ -11,7 +11,6 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
@@ -81,7 +80,7 @@ func process(arg string) ([]match, error) {
 			newFiler = filer.FromGitURL
 		}
 	} else if !fi.IsDir() {
-		return nil, errors.Errorf("%s is not a directory", arg)
+		newFiler = filer.FromSiva
 	}
 
 	resolvedFiler, err := newFiler(arg)
