@@ -80,7 +80,7 @@ Comparison to other projects on that dataset:
 
 |Detector|Detection rate|Time to scan, sec|
 |:-------|:----------------------------------------:|:-----------------------------------------|
-|[go-license-detector](https://github.com/src-d/go-license-detector)| 99%  (897/902) | 23 |
+|[go-license-detector](https://github.com/src-d/go-license-detector)| 99%  (897/902) | 16 |
 |[benbalter/licensee](https://github.com/benbalter/licensee)| 75%  (673/902) | 111 |
 |[google/licenseclassifier](https://github.com/google/licenseclassifier)| 76%  (682/902) | 907 |
 |[boyter/lc](https://github.com/boyter/lc)| 88%  (797/902) | 548 |
