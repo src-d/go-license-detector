@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	format := pflag.String("f", "text", "Output format: json, text")
+	format := pflag.StringP("format", "f", "text", "Output format: json, text")
 	pflag.Usage = func() {
 		fmt.Println("Usage:  license-detector path ...")
 		pflag.PrintDefaults()
@@ -28,10 +28,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	// json cannot not marshal error-s as we would expect (we always get "{}")
+	// so we have to include ErrStr which is Err.Error()
 	type result struct {
-		Arg     string
-		Matches []match `json:",omitempty"`
-		Err     error   `json:",omitempty"`
+		Arg     string  `json:"project,omitempty"`
+		Matches []match `json:"matches,omitempty"`
+		Err     error   `json:"-"`
+		ErrStr  string  `json:"error,omitempty"`
 	}
 	results := make([]result, pflag.NArg())
 	var wg sync.WaitGroup
@@ -40,7 +43,11 @@ func main() {
 		go func(i int, arg string) {
 			defer wg.Done()
 			matches, err := process(arg)
-			results[i] = result{arg, matches, err}
+			res := result{Arg: arg, Matches: matches, Err: err, ErrStr: ""}
+			if err != nil {
+				res.ErrStr = err.Error()
+			}
+			results[i] = res
 		}(i, arg)
 	}
 	wg.Wait()
