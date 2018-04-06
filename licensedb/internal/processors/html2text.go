@@ -143,8 +143,7 @@ func HTML(htmlSource []byte) []byte {
 				}
 			}
 		} else if htmlHeaderRe.Match(tagName) && doc.Token().Type == html.EndTagToken {
-			last := result.Bytes()[result.Len()-1]
-			if !marksRe.MatchString(string(last)) {
+			if result.Len() > 0 && !marksRe.MatchString(string(result.Bytes()[result.Len()-1])) {
 				result.WriteRune('.')
 			}
 		}
