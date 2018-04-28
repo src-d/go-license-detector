@@ -4,8 +4,14 @@ language: go
 
 go_import_path: gopkg.in/src-d/go-license-detector.v2
 go:
-  - 1.8
-  - 1.9
+  - 1.9.x
+  - 1.10.x
+  - tip
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: tip
 
 before_install:
   - go get -v github.com/golang/lint/golint
@@ -14,7 +20,7 @@ install:
   - go get -v -t ./...
 
 script:
-  - if [[ "$(go version)" != *go1.8* ]]; then go vet ./...; fi
+  - go vet ./...
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi
   - go test -cpu=1,2 gopkg.in/src-d/go-license-detector.v2/...
@@ -27,7 +33,7 @@ jobs:
   include:
     - stage: deploy
       os: osx
-      go: 1.9
+      go: 1.10.x
       after_success:
         - gzip -S .darwin_amd64.gz $GOPATH/bin/license-detector
       script: skip
@@ -41,7 +47,7 @@ jobs:
           tags: true
     - stage: deploy
       os: linux
-      go: 1.9
+      go: 1.10.x
       script: skip
       after_success:
         - gzip -S .linux_amd64.gz $GOPATH/bin/license-detector
