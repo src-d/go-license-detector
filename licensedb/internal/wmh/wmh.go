@@ -1,11 +1,12 @@
 package wmh
 
 import (
+	"log"
 	"math"
 
-	"fmt"
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/fastlog"
 )
 
 const maxUint16 = 65536
@@ -44,7 +45,7 @@ func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHashe
 		arr := make([]float32, dim)
 		hasher.lnCs[y] = arr
 		for x := 0; x < dim; x++ {
-			arr[x] = float32(math.Log(gammaGen.Rand()))
+			arr[x] = fastlog.Log(float32(gammaGen.Rand()))
 		}
 	}
 	uniformGen := distuv.Uniform{Min: 0, Max: 1, Src: randSrc}
@@ -62,22 +63,30 @@ func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHashe
 // Hash calculates the Weighted MinHash from the weighted bag of features.
 // Each feature has an index and a value.
 func (wmh *WeightedMinHasher) Hash(values []float32, indices []int) []uint64 {
+	for i, v := range values {
+		if v < 0 {
+			log.Fatalf("negative value in the vector: %f @ %d", v, i)
+		}
+	}
+	for vi, j := range indices {
+		if j >= wmh.dim {
+			log.Fatalf("index is out of range: %d @ %d", j, vi)
+		}
+	}
 	hashvalues := make([]uint64, wmh.sampleSize)
 	for s := 0; s < wmh.sampleSize; s++ {
-		minLnA := math.MaxFloat64
+		minLnA := float32(math.MaxFloat32)
 		var k int
-		var minT float64
+		var minT float32
 		for vi, j := range indices {
-			if j >= wmh.dim {
-				panic("index is out of range")
-			}
-			vlog := math.Log(float64(values[vi]))
+			vlog := fastlog.Log(values[vi])
+			beta := float32(wmh.betas[s][j]) / float32(maxUint16)
 			// t = np.floor((vlog / self.rs[i]) + self.betas[i])
-			t := math.Floor(vlog/float64(wmh.rs[s][j])) + float64(wmh.betas[s][j])
+			t := float32(math.Floor(float64(vlog/wmh.rs[s][j] + beta)))
 			// ln_y = (t - self.betas[i]) * self.rs[i]
-			lnY := (t - float64(wmh.betas[s][j])) / maxUint16 * float64(wmh.rs[s][j])
+			lnY := (t - beta) * wmh.rs[s][j]
 			// ln_a = self.ln_cs[i] - ln_y - self.rs[i]
-			lnA := float64(wmh.lnCs[s][j]) - lnY - float64(wmh.rs[s][j])
+			lnA := wmh.lnCs[s][j] - lnY - wmh.rs[s][j]
 			// k = np.nanargmin(ln_a)
 			if lnA < minLnA {
 				minLnA = lnA
@@ -94,7 +103,7 @@ func (wmh *WeightedMinHasher) Hash(values []float32, indices []int) []uint64 {
 		case 16:
 			hashvalues[s] = uint64(uint16(k) | (uint16(minT) << 8))
 		default:
-			panic(fmt.Sprintf("unsupported bitness value: %d", wmh.Bitness))
+			log.Fatalf("unsupported bitness value: %d", wmh.Bitness)
 		}
 	}
 	return hashvalues
