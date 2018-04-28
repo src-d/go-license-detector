@@ -1,4 +1,4 @@
-package licensedb
+package internal
 
 import (
 	"regexp"

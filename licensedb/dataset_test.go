@@ -2,12 +2,12 @@ package licensedb
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
-	"os"
 )
 
 func TestDataset(t *testing.T) {

@@ -1,4 +1,4 @@
-package licensedb
+package internal
 
 import (
 	"archive/tar"
@@ -7,7 +7,6 @@ import (
 	"index/suffixarray"
 	"io"
 	"log"
-	"math"
 	"os"
 	"regexp"
 	"sort"
@@ -17,6 +16,7 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/assets"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/fastlog"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/normalize"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/wmh"
 )
@@ -390,5 +390,10 @@ func (db *database) QueryReadmeText(text string) map[string]float32 {
 }
 
 func tfidf(freq int, docfreq int, ndocs int) float32 {
-	return float32(math.Log(1+float64(freq)) * math.Log(float64(ndocs)/float64(docfreq)))
+	weight := fastlog.Log(1+float32(freq)) * fastlog.Log(float32(ndocs)/float32(docfreq))
+	if weight < 0 {
+		// logarithm is approximate
+		return 0
+	}
+	return weight
 }
