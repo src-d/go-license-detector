@@ -14,10 +14,10 @@ import (
 var (
 	lineEndingsRe = regexp.MustCompile("\\r\\n?")
 	// 3.1.1 All whitespace should be treated as a single blank space.
-	whitespaceRe         = regexp.MustCompile("[\\t\\f\\r              　​]+")
-	trailingWhitespaceRe = regexp.MustCompile("(?m)[\\t\\f\\r              　​]$")
+	whitespaceRe         = regexp.MustCompile("[ \\t\\f\\r             　​]+")
+	trailingWhitespaceRe = regexp.MustCompile("(?m)[ \\t\\f\\r             　​]$")
 	licenseHeaderRe      = regexp.MustCompile("(licen[cs]e)\\.?\\n\\n")
-	leadingWhitespaceRe  = regexp.MustCompile("(?m)^(( (\\n?))|\\n)")
+	leadingWhitespaceRe  = regexp.MustCompile("(?m)^(( \\n?)|\\n)")
 	// 5.1.2 Hyphens, Dashes  Any hyphen, dash, en dash, em dash, or other variation should be
 	// considered equivalent.
 	punctuationRe = regexp.MustCompile("[-‒–—―⁓⸺⸻~˗‐‑⁃⁻₋−∼⎯⏤─➖𐆑֊﹘﹣－]+")
@@ -75,8 +75,8 @@ var (
 	)
 
 	// 9.1.1 "©", "(c)", or "Copyright" should be considered equivalent and interchangeable.
-	copyrightRe = regexp.MustCompile("©|\\(c\\)|copyright")
-	trademarkRe = regexp.MustCompile("™|\\(tm\\)|trademark(s?)")
+	copyrightRe = regexp.MustCompile("copyright|\\(c\\)")
+	trademarkRe = regexp.MustCompile("trademark(s?)|\\(tm\\)")
 
 	// extra cleanup
 	brokenLinkRe    = regexp.MustCompile("http s ://")
