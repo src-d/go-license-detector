@@ -1,15 +1,19 @@
 package wmh
 
 import (
+	"encoding/binary"
+	"errors"
 	"log"
 	"math"
+	"reflect"
+	"unsafe"
 
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/fastlog"
 )
 
-const maxUint16 = 65536
+const maxUint16 = 65535
 
 // WeightedMinHasher calculates Weighted MinHash-es.
 // https://ekzhu.github.io/datasketch/weightedminhash.html
@@ -60,17 +64,100 @@ func NewWeightedMinHasher(dim int, sampleSize int, seed int64) *WeightedMinHashe
 	return hasher
 }
 
+// MarshalBinary serializes the WeightedMinHasher.
+func (wmh *WeightedMinHasher) MarshalBinary() (data []byte, err error) {
+	data = make([]byte, 9+wmh.sampleSize*wmh.dim*(4*2+2))
+	data[0] = byte(wmh.Bitness)
+	binary.LittleEndian.PutUint32(data[1:5], uint32(wmh.dim))
+	binary.LittleEndian.PutUint32(data[5:9], uint32(wmh.sampleSize))
+	offset := 9
+	writeFloat32Slice := func(arr []float32) {
+		header := *(*reflect.SliceHeader)(unsafe.Pointer(&arr))
+		header.Len *= 4
+		header.Cap *= 4
+		buffer := *(*[]byte)(unsafe.Pointer(&header))
+		copy(data[offset:], buffer)
+		offset += len(buffer)
+	}
+	for _, arr := range wmh.rs {
+		writeFloat32Slice(arr)
+	}
+	for _, arr := range wmh.lnCs {
+		writeFloat32Slice(arr)
+	}
+	for _, arr := range wmh.betas {
+		header := *(*reflect.SliceHeader)(unsafe.Pointer(&arr))
+		header.Len *= 2
+		header.Cap *= 2
+		buffer := *(*[]byte)(unsafe.Pointer(&header))
+		copy(data[offset:], buffer)
+		offset += len(buffer)
+	}
+	return data, nil
+}
+
+// UnmarshalBinary reads a WeightedMinHasher previously serialized with MarshalBinary().
+func (wmh *WeightedMinHasher) UnmarshalBinary(data []byte) error {
+	if len(data) < 9 {
+		return errors.New("invalid binary format: no header")
+	}
+	wmh.Bitness = int(data[0])
+	wmh.dim = int(binary.LittleEndian.Uint32(data[1:5]))
+	wmh.sampleSize = int(binary.LittleEndian.Uint32(data[5:9]))
+	if len(data)-9 != wmh.sampleSize*wmh.dim*(4*2+2) {
+		return errors.New("invalid binary format: body size mismatch")
+	}
+	wmh.rs = make([][]float32, wmh.sampleSize)
+	wmh.lnCs = make([][]float32, wmh.sampleSize)
+	wmh.betas = make([][]uint16, wmh.sampleSize)
+	readFloat32Slice := func(dest []float32, src []byte) {
+		header := *(*reflect.SliceHeader)(unsafe.Pointer(&src))
+		header.Len /= 4
+		header.Cap /= 4
+		buffer := *(*[]float32)(unsafe.Pointer(&header))
+		copy(dest, buffer)
+	}
+	offset := 9
+	for i := range wmh.rs {
+		wmh.rs[i] = make([]float32, wmh.dim)
+		nextOffset := offset + wmh.dim*4
+		readFloat32Slice(wmh.rs[i], data[offset:nextOffset])
+		offset = nextOffset
+	}
+	for i := range wmh.lnCs {
+		wmh.lnCs[i] = make([]float32, wmh.dim)
+		nextOffset := offset + wmh.dim*4
+		readFloat32Slice(wmh.lnCs[i], data[offset:nextOffset])
+		offset = nextOffset
+	}
+	for i := range wmh.betas {
+		wmh.betas[i] = make([]uint16, wmh.dim)
+		nextOffset := offset + wmh.dim*2
+		slice := data[offset:nextOffset]
+		header := *(*reflect.SliceHeader)(unsafe.Pointer(&slice))
+		header.Len /= 2
+		header.Cap /= 2
+		buffer := *(*[]uint16)(unsafe.Pointer(&header))
+		copy(wmh.betas[i], buffer)
+		offset = nextOffset
+	}
+	return nil
+}
+
 // Hash calculates the Weighted MinHash from the weighted bag of features.
 // Each feature has an index and a value.
 func (wmh *WeightedMinHasher) Hash(values []float32, indices []int) []uint64 {
+	if len(values) != len(indices) {
+		log.Panicf("len(values)=%d is not equal to len(indices)=%d", len(values), len(indices))
+	}
 	for i, v := range values {
 		if v < 0 {
-			log.Fatalf("negative value in the vector: %f @ %d", v, i)
+			log.Panicf("negative value in the vector: %f @ %d", v, i)
 		}
 	}
 	for vi, j := range indices {
 		if j >= wmh.dim {
-			log.Fatalf("index is out of range: %d @ %d", j, vi)
+			log.Panicf("index is out of range: %d @ %d", j, vi)
 		}
 	}
 	hashvalues := make([]uint64, wmh.sampleSize)
