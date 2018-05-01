@@ -18,7 +18,7 @@ The intended area of it's usage is data mining.
 ## Installation
 
 ```
-go get -v -d gopkg.in/src-d/go-license-detector.v1/...
+go get -v -d gopkg.in/src-d/go-license-detector.v2/...
 ```
 
 ## Contributions
