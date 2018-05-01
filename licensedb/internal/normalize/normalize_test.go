@@ -19,6 +19,10 @@ func TestNormalizeLines(t *testing.T) {
 			`"you" (or "your") shall mean an individual or legal entity exercising
 permissions granted by this license.`},
 		{"normalize links", "A <https://fsf.org/> B", "a https:/fsf.org/ b"},
+		{"license", "license.\n\nlicence\n\n", "license\n\nlicense\n\n"},
+		{"punctuation", "a-‒–—―⁓⸺⸻~˗‐‑⁃⁻₋−∼⎯⏤─➖𐆑֊﹘﹣－", "a-"},
+		{"bullet", "-\n*\n✱\n﹡\n•\n●\n⚫\n⏺\n🞄\n∙\n⋅\n", ""},
+		{"license", "", ""},
 	}
 
 	for _, tc := range tt {
