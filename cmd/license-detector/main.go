@@ -6,6 +6,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/url"
 	"os"
 	"sort"
@@ -19,7 +21,7 @@ import (
 func main() {
 	format := pflag.StringP("format", "f", "text", "Output format: json, text")
 	pflag.Usage = func() {
-		fmt.Println("Usage:  license-detector path ...")
+		fmt.Fprintln(os.Stderr, "Usage:  license-detector path ...")
 		pflag.PrintDefaults()
 	}
 	pflag.Parse()
@@ -27,19 +29,17 @@ func main() {
 		pflag.Usage()
 		os.Exit(1)
 	}
+	detect(pflag.Args(), *format, os.Stdout)
+}
 
-	// json cannot not marshal error-s as we would expect (we always get "{}")
-	// so we have to include ErrStr which is Err.Error()
-	type result struct {
-		Arg     string  `json:"project,omitempty"`
-		Matches []match `json:"matches,omitempty"`
-		Err     error   `json:"-"`
-		ErrStr  string  `json:"error,omitempty"`
-	}
-	results := make([]result, pflag.NArg())
+// detect runs license analysis on each item in `args`` and outputs
+// the results in the specified `format` to `writer`.
+func detect(args []string, format string, writer io.Writer) {
+	nargs := len(args)
+	results := make([]result, nargs)
 	var wg sync.WaitGroup
-	wg.Add(pflag.NArg())
-	for i, arg := range pflag.Args() {
+	wg.Add(nargs)
+	for i, arg := range args {
 		go func(i int, arg string) {
 			defer wg.Done()
 			matches, err := process(arg)
@@ -52,31 +52,39 @@ func main() {
 	}
 	wg.Wait()
 
-	switch *format {
+	switch format {
 	case "text":
 		for _, res := range results {
-			fmt.Println(res.Arg)
+			fmt.Fprintln(writer, res.Arg)
 			if res.Err != nil {
-				fmt.Printf("\t%v\n", res.Err)
+				fmt.Fprintf(writer, "\t%v\n", res.Err)
 				continue
 			}
 			for _, m := range res.Matches {
-				fmt.Printf("\t%1.f%%\t%s\n", 100*m.Confidence, m.License)
+				fmt.Fprintf(writer, "\t%1.f%%\t%s\n", 100*m.Confidence, m.License)
 			}
 		}
 	case "json":
 		b, err := json.MarshalIndent(results, "", "\t")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "could not encode result to JSON: %v", err)
-			os.Exit(1)
+			log.Fatalf("could not encode result to JSON: %v", err)
 		}
-		fmt.Printf("%s\n", b)
+		fmt.Fprintf(writer, "%s\n", b)
 	}
 }
 
+// json cannot not marshal error-s as we would expect (we always get "{}")
+// so we have to include ErrStr which is Err.Error()
+type result struct {
+	Arg     string  `json:"project,omitempty"`
+	Matches []match `json:"matches,omitempty"`
+	Err     error   `json:"-"`
+	ErrStr  string  `json:"error,omitempty"`
+}
+
 type match struct {
-	License    string
-	Confidence float32
+	License    string  `json:"license"`
+	Confidence float32 `json:"confidence"`
 }
 
 func process(arg string) ([]match, error) {

@@ -9,16 +9,16 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	sivafs "gopkg.in/src-d/go-billy-siva.v4"
+	"gopkg.in/src-d/go-billy.v4/memfs"
+	"gopkg.in/src-d/go-billy.v4/osfs"
 	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/filemode"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"gopkg.in/src-d/go-git.v4/plumbing/storer"
 	"gopkg.in/src-d/go-git.v4/storage/filesystem"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
-	sivafs "gopkg.in/src-d/go-billy-siva.v4"
-	"gopkg.in/src-d/go-billy.v4/osfs"
-	"gopkg.in/src-d/go-billy.v4/memfs"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/storer"
 )
 
 // File represents a file in the virtual file system: every node is either a regular file
@@ -30,8 +30,11 @@ type File struct {
 
 // A Filer provides a list of files.
 type Filer interface {
+	// ReadFile returns the contents of a file given it's path.
 	ReadFile(path string) (content []byte, err error)
+	// ReadDir lists a directory.
 	ReadDir(path string) ([]File, error)
+	// Close frees all the resources allocated by this Filer.
 	Close()
 }
 
