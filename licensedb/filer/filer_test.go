@@ -30,6 +30,18 @@ func testFiler(t *testing.T, filer Filer) {
 	content, err = filer.ReadFile("two/three")
 	assert.Nil(t, err)
 	assert.Equal(t, "world\n", string(content))
+
+	files, err = filer.ReadDir("..")
+	assert.Nil(t, files)
+	assert.NotNil(t, err)
+
+	files, err = filer.ReadDir("two/three")
+	assert.Nil(t, files)
+	assert.NotNil(t, err)
+
+	content, err = filer.ReadFile("two/four")
+	assert.Nil(t, content)
+	assert.NotNil(t, err)
 }
 
 func TestLocalFiler(t *testing.T) {
@@ -37,6 +49,9 @@ func TestLocalFiler(t *testing.T) {
 	assert.Nil(t, err)
 	testFiler(t, filer)
 	filer, err = FromDirectory("test_data/local2")
+	assert.Nil(t, filer)
+	assert.NotNil(t, err)
+	filer, err = FromDirectory("test_data/local/one")
 	assert.Nil(t, filer)
 	assert.NotNil(t, err)
 }

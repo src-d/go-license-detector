@@ -304,6 +304,9 @@ func (filer *zipFiler) ReadDir(path string) ([]File, error) {
 			return nil, errors.Errorf("does not exist: %s", path)
 		}
 	}
+	if path != "" && !node.file.FileInfo().IsDir() {
+		return nil, errors.Errorf("not a directory: %s", path)
+	}
 	result := make([]File, 0, len(node.children))
 	for name, child := range node.children {
 		result = append(result, File{
