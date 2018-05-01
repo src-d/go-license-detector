@@ -53,45 +53,45 @@ func parseHTMLEntity(entName []byte) []byte {
 	case "reg":
 		return []byte("®")
 	case "ldquo":
-		return []byte("\"")
+		return []byte("“")
 	case "rdquo":
-		return []byte("\"")
+		return []byte("”")
 	case "lsquo":
-		return []byte("'")
+		return []byte("‘")
 	case "rsquo":
-		return []byte("'")
+		return []byte("’")
 	case "sbquo":
-		return []byte("\"")
+		return []byte("‚")
 	case "rbquo":
 		return []byte("\"")
 	case "bdquo":
-		return []byte("\"")
+		return []byte("„")
 	case "ndash":
-		return []byte("-")
+		return []byte("–")
 	case "mdash":
-		return []byte("-")
+		return []byte("—")
 	case "bull":
-		return []byte("*")
+		return []byte("•")
 	case "hellip":
-		return []byte("...")
+		return []byte("…")
 	case "prime":
-		return []byte("'")
+		return []byte("′")
 	case "lsaquo":
-		return []byte("'")
+		return []byte("‹")
 	case "rsaquo":
-		return []byte("'")
+		return []byte("›")
 	case "trade":
 		return []byte("™")
 	case "minus":
-		return []byte("-")
+		return []byte("−")
 	case "raquo":
-		return []byte("\"")
+		return []byte("»")
 	case "laquo":
-		return []byte("\"")
+		return []byte("«")
 	case "deg":
 		return []byte("°")
 	case "sect":
-		return []byte("*")
+		return []byte("§")
 	case "iexcl":
 		return []byte("¡")
 	default:

@@ -24,7 +24,8 @@ script:
   - go vet ./...
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi
-  - goverage -v -cpu=1,2 -coverprofile=coverage.txt -covermode=count gopkg.in/src-d/go-license-detector.v2/...
+  - goverage -cpu=1,2 -coverprofile=coverage.txt -covermode=count gopkg.in/src-d/go-license-detector.v2/...
+  - sed -i '/assets/d' coverage.txt
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
