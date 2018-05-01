@@ -1,13 +1,14 @@
 # go-license-detector [![GoDoc](https://godoc.org/gopkg.in/src-d/go-license-detector.v1?status.svg)](http://godoc.org/gopkg.in/src-d/go-license-detector.v1) [![Build Status](https://travis-ci.org/src-d/go-license-detector.svg?branch=master)](https://travis-ci.org/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
 
-Project license detector - a command line application or a library, written in Go.
+Project license detector - a command line application and a library, written in Go.
 It scans the given directory for license files, normalizes and hashes them and outputs
-all found fuzzy matches with the list of reference texts.
+all the fuzzy matches with the list of reference texts.
 The returned names follow [SPDX](https://spdx.org/licenses/) standard.
+Read the [blog post](https://blog.sourced.tech/post/gld/).
 
-Why? There are no similar projects exist which can be compiled into a native binary without
-dependencies and also supports the whole SPDX license database (≈400 items).
-The implementation is also fast and the API is easy to use.
+Why? There are no similar projects which can be compiled into a native binary without
+dependencies and also support the whole SPDX license database (≈400 items).
+This implementation is also fast, requires little memory, and the API is easy to use.
 
 The license texts are taken directly from [license-list-data](https://github.com/spdx/license-list-data)
 repository. The detection algorithm is **not template matching**;
@@ -63,10 +64,13 @@ license-detector https://github.com/src-d/go-git
 Library:
 
 ```go
-import go-license-detector.v2
+import (
+    "gopkg.in/src-d/go-license-detector.v2/licensedb"
+    "gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
+)
 
 func main() {
-	licenses, err := ld.InvestigateProjectLicenses("/path/to/project")
+	licenses, err := licensedb.Detect(filer.FromDirectory("/path/to/project"))
 }
 ```
 
@@ -80,7 +84,7 @@ Comparison to other projects on that dataset:
 
 |Detector|Detection rate|Time to scan, sec|
 |:-------|:----------------------------------------:|:-----------------------------------------|
-|[go-license-detector](https://github.com/src-d/go-license-detector)| 99%  (897/902) | 16 |
+|[go-license-detector](https://github.com/src-d/go-license-detector)| 99%  (897/902) | 13.5 |
 |[benbalter/licensee](https://github.com/benbalter/licensee)| 75%  (673/902) | 111 |
 |[google/licenseclassifier](https://github.com/google/licenseclassifier)| 76%  (682/902) | 907 |
 |[boyter/lc](https://github.com/boyter/lc)| 88%  (797/902) | 548 |
