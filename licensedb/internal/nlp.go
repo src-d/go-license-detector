@@ -2,6 +2,7 @@ package internal
 
 import (
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/jdkato/prose/chunk"
@@ -137,5 +138,8 @@ func splitLicenseName(name string) []substring {
 		result[i] = substring{value: key, count: val}
 		i++
 	}
+	sort.Slice(result, func(i int, j int) bool {
+		return result[i].value > result[j].value
+	})
 	return result
 }
