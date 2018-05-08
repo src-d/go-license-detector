@@ -44,9 +44,13 @@ type database struct {
 	lsh *minhashlsh.MinhashLSH
 	// turns a license text into a hash
 	hasher *wmh.WeightedMinHasher
-	// part of license name -> list of containing license names
+	// part of license short name (e,g, BSL-1.0) -> list of containing license names
+	nameShortSubstrings map[string][]substring
+	// number of substrings per short license name
+	nameShortSubstringSizes map[string]int
+	// part of license name (e,g, Boost Software License 1.0) -> list of containing license names
 	nameSubstrings map[string][]substring
-	// number of substrings per license
+	// number of substrings per license name
 	nameSubstringSizes map[string]int
 }
 
@@ -70,13 +74,7 @@ func (db database) VocabularySize() int {
 	return len(db.tokens)
 }
 
-// Load takes the licenses from the embedded storage, normalizes, hashes them and builds the
-// LSH hashtables.
-func loadLicenses() *database {
-	db := &database{}
-	if os.Getenv("LICENSE_DEBUG") != "" {
-		db.debug = true
-	}
+func loadUrls(db *database) {
 	urlCSVBytes, err := assets.Asset("urls.csv")
 	if err != nil {
 		log.Fatalf("failed to load urls.csv from the assets: %v", err)
@@ -96,6 +94,52 @@ func loadLicenses() *database {
 		}
 	}
 	db.urlRe = regexp.MustCompile(urlReWriter.String())
+}
+
+func loadNames(db *database) {
+	namesBytes, err := assets.Asset("names.csv")
+	if err != nil {
+		log.Fatalf("failed to load banes.csv from the assets: %v", err)
+	}
+	namesReader := csv.NewReader(bytes.NewReader(namesBytes))
+	records, err := namesReader.ReadAll()
+	if err != nil || len(records) == 0 {
+		log.Fatalf("failed to parse names.csv from the assets: %v", err)
+	}
+	db.nameSubstringSizes = map[string]int{}
+	db.nameSubstrings = map[string][]substring{}
+	for _, record := range records {
+		registerNameSubstrings(record[1], record[0], db.nameSubstringSizes, db.nameSubstrings)
+	}
+}
+
+func registerNameSubstrings(
+	name string, key string, sizes map[string]int, substrs map[string][]substring) {
+	parts := splitLicenseName(name)
+	sizes[key] = 0
+	for _, part := range parts {
+		if licenseReadmeRe.MatchString(part.value) {
+			continue
+		}
+		sizes[key]++
+		list := substrs[part.value]
+		if list == nil {
+			list = []substring{}
+		}
+		list = append(list, substring{value: key, count: part.count})
+		substrs[part.value] = list
+	}
+}
+
+// Load takes the licenses from the embedded storage, normalizes, hashes them and builds the
+// LSH hashtables.
+func loadLicenses() *database {
+	db := &database{}
+	if os.Getenv("LICENSE_DEBUG") != "" {
+		db.debug = true
+	}
+	loadUrls(db)
+	loadNames(db)
 	tarBytes, err := assets.Asset("licenses.tar")
 	if err != nil {
 		log.Fatalf("failed to load licenses.tar from the assets: %v", err)
@@ -174,8 +218,8 @@ func loadLicenses() *database {
 		log.Println("LSH:", k, l)
 	}
 	db.hasher = wmh.NewWeightedMinHasher(len(uniqueTokens), numHashes, 7)
-	db.nameSubstrings = map[string][]substring{}
-	db.nameSubstringSizes = map[string]int{}
+	db.nameShortSubstrings = map[string][]substring{}
+	db.nameShortSubstringSizes = map[string]int{}
 	for key, tokens := range tokenFreqs {
 		indices := make([]int, len(tokens))
 		values := make([]float32, len(tokens))
@@ -188,18 +232,7 @@ func loadLicenses() *database {
 			}
 		}
 		db.lsh.Add(key, db.hasher.Hash(values, indices))
-
-		// register all substrings
-		parts := splitLicenseName(key)
-		db.nameSubstringSizes[key] = len(parts)
-		for _, part := range parts {
-			list := db.nameSubstrings[part.value]
-			if list == nil {
-				list = []substring{}
-			}
-			list = append(list, substring{value: key, count: part.count})
-			db.nameSubstrings[part.value] = list
-		}
+		registerNameSubstrings(key, key, db.nameShortSubstringSizes, db.nameShortSubstrings)
 	}
 	db.lsh.Index()
 	return db
@@ -379,7 +412,17 @@ func (db *database) scanForURLs(text string) map[string]bool {
 
 // QueryReadmeText tries to detect licenses mentioned in the README.
 func (db *database) QueryReadmeText(text string) map[string]float32 {
-	candidates := investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
+	candidates1 := investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
+	candidates2 := investigateReadmeFile(text, db.nameShortSubstrings, db.nameShortSubstringSizes)
+	candidates := map[string]float32{}
+	for key, val := range candidates1 {
+		candidates[key] = val
+	}
+	for key, val := range candidates2 {
+		if candidates[key] < val {
+			candidates[key] = val
+		}
+	}
 	if db.debug {
 		for key, val := range candidates {
 			println("NLP", key, val)

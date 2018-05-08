@@ -69,7 +69,7 @@ func investigateReadmeFile(
 			continue
 		}
 		scores := map[string]map[string]int{}
-		entity = licenseReadmeRe.ReplaceAllString(entity, "")
+		entity = licenseReadmeRe.ReplaceAllString(entity, " ")
 		substrs := splitLicenseName(entity)
 		for _, substr := range substrs {
 			for _, match := range licenseNameParts[substr.value] {
