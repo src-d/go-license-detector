@@ -88,6 +88,8 @@ Comparison to other projects on that dataset:
 |[benbalter/licensee](https://github.com/benbalter/licensee)| 75%  (673/902) | 111 |
 |[google/licenseclassifier](https://github.com/google/licenseclassifier)| 76%  (682/902) | 907 |
 |[boyter/lc](https://github.com/boyter/lc)| 88%  (797/902) | 548 |
+|[amzn/askalono](https://github.com/amzn/askalono)| 87%  (785/902) | 165 |
+|[LiD](https://source.codeaurora.org/external/qostg/lid)| 94%  (847/902) | 3660 |
 
 <details><summary>How this was measured</summary>
 <pre><code>$ cd $(go env GOPATH)/src/gopkg.in/src-d/go-license-detector.v2/licensedb
@@ -105,6 +107,15 @@ $ time find -type f -print | xargs -n1 -P4 identify_license \
 $ # boyter/lc
 $ time lc . \
   | grep -vE 'NOASSERTION|----|Directory' | cut -d" " -f1 | sort | uniq | wc -l
+$ # amzn/askalono
+$ echo '#!/bin/sh
+result=$(askalono id "$1")
+echo "$1
+$result"' > ../askalono.wrapper
+$ time find -type f -print | xargs -n1 -P4 sh ../askalono.wrapper | grep -Pzo '.*\nLicense: .*\n' askalono.txt | grep -av "License: " | cut -d/ -f 2 | sort | uniq | wc -l
+$ # LiD
+$ time license-identifier -I dataset -F csv -O lid
+$ cat lid_*.csv | cut -d, -f1 | cut -d"'" -f 2 | grep / | cut -d/ -f2 | sort | uniq | wc -l
 </code></pre>
 </details>
 
