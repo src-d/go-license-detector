@@ -123,10 +123,10 @@ func ExtractReadmeFiles(files []string, fs filer.Filer) [][]byte {
 
 // InvestigateReadmeTexts scans README files for licensing information and outputs the
 // probable names using NER.
-func InvestigateReadmeTexts(texts [][]byte) map[string]float32 {
+func InvestigateReadmeTexts(texts [][]byte, fs filer.Filer) map[string]float32 {
 	maxLicenses := map[string]float32{}
 	for _, text := range texts {
-		candidates := InvestigateReadmeText(text)
+		candidates := InvestigateReadmeText(text, fs)
 		for name, sim := range candidates {
 			maxSim := maxLicenses[name]
 			if sim > maxSim {
@@ -139,8 +139,8 @@ func InvestigateReadmeTexts(texts [][]byte) map[string]float32 {
 
 // InvestigateReadmeText scans the README file for licensing information and outputs probable
 // names found with Named Entity Recognition from NLP.
-func InvestigateReadmeText(text []byte) map[string]float32 {
-	return globalLicenseDatabase.QueryReadmeText(string(text))
+func InvestigateReadmeText(text []byte, fs filer.Filer) map[string]float32 {
+	return globalLicenseDatabase.QueryReadmeText(string(text), fs)
 }
 
 // IsLicenseDirectory indicates whether the directory is likely to contain licenses.

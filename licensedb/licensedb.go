@@ -46,7 +46,7 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 	if len(candidates) == 0 {
 		return nil, ErrNoLicenseFound
 	}
-	licenses = internal.InvestigateReadmeTexts(candidates)
+	licenses = internal.InvestigateReadmeTexts(candidates, fs)
 	if len(licenses) == 0 {
 		return nil, ErrNoLicenseFound
 	}
