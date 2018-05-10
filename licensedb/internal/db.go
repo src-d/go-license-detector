@@ -4,10 +4,12 @@ import (
 	"archive/tar"
 	"bytes"
 	"encoding/csv"
+	"fmt"
 	"index/suffixarray"
 	"io"
 	"log"
 	"os"
+	paths "path"
 	"regexp"
 	"sort"
 	"strings"
@@ -15,10 +17,17 @@ import (
 	"github.com/ekzhu/minhash-lsh"
 	"github.com/sergi/go-diff/diffmatchpatch"
 
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/assets"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/fastlog"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/normalize"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/wmh"
+)
+
+var (
+	licenseReadmeMentionRe = regexp.MustCompile(
+		fmt.Sprintf("(?i)[^\\s]+/[^/\\s]*(%s)[^\\s]*",
+			strings.Join(licenseFileNames, "|")))
 )
 
 // database holds the license texts, their hashes and the hashtables to query for nearest
@@ -411,17 +420,28 @@ func (db *database) scanForURLs(text string) map[string]bool {
 }
 
 // QueryReadmeText tries to detect licenses mentioned in the README.
-func (db *database) QueryReadmeText(text string) map[string]float32 {
-	candidates1 := investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes)
-	candidates2 := investigateReadmeFile(text, db.nameShortSubstrings, db.nameShortSubstringSizes)
+func (db *database) QueryReadmeText(text string, fs filer.Filer) map[string]float32 {
 	candidates := map[string]float32{}
-	for key, val := range candidates1 {
-		candidates[key] = val
-	}
-	for key, val := range candidates2 {
-		if candidates[key] < val {
-			candidates[key] = val
+	append := func(others map[string]float32) {
+		for key, val := range others {
+			if candidates[key] < val {
+				candidates[key] = val
+			}
 		}
+	}
+	for _, match := range licenseReadmeMentionRe.FindAllString(text, -1) {
+		match = strings.TrimRight(match, ".,:;-")
+		content, err := fs.ReadFile(match)
+		if err == nil {
+			if preprocessor, exists := filePreprocessors[paths.Ext(match)]; exists {
+				content = preprocessor(content)
+			}
+			append(db.QueryLicenseText(string(content)))
+		}
+	}
+	if len(candidates) == 0 {
+		append(investigateReadmeFile(text, db.nameSubstrings, db.nameSubstringSizes))
+		append(investigateReadmeFile(text, db.nameShortSubstrings, db.nameShortSubstringSizes))
 	}
 	if db.debug {
 		for key, val := range candidates {
