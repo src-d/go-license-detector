@@ -40,7 +40,7 @@ func investigateReadmeFile(
 	endIndex := matches[len(matches)-1][1]
 	for ; endIndex < len(text)-1 && text[endIndex:endIndex+2] != "\n\n"; endIndex++ {
 	}
-	candidates := globalLicenseDatabase.QueryLicenseText(text[beginIndex:endIndex])
+	candidates := globalLicenseDatabase().QueryLicenseText(text[beginIndex:endIndex])
 
 	beginIndex = matches[0][0]
 	endIndex = beginIndex + 50
