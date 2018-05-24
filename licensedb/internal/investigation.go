@@ -6,13 +6,23 @@ import (
 	paths "path"
 	"regexp"
 	"strings"
+	"sync"
 
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/processors"
 )
 
 var (
-	globalLicenseDatabase = loadLicenses()
+	globalLicenseDB struct {
+		sync.Once
+		*database
+	}
+	globalLicenseDatabase = func() *database {
+		globalLicenseDB.Once.Do(func() {
+			globalLicenseDB.database = loadLicenses()
+		})
+		return globalLicenseDB.database
+	}
 
 	// Base names of guessable license files
 	licenseFileNames = []string{
@@ -100,7 +110,7 @@ func InvestigateLicenseTexts(texts [][]byte) map[string]float32 {
 // InvestigateLicenseText takes the license text and returns the most probable reference licenses matched.
 // Each match has the confidence assigned, from 0 to 1, 1 means 100% confident.
 func InvestigateLicenseText(text []byte) map[string]float32 {
-	return globalLicenseDatabase.QueryLicenseText(string(text))
+	return globalLicenseDatabase().QueryLicenseText(string(text))
 }
 
 // ExtractReadmeFiles searches for README files.
@@ -140,7 +150,7 @@ func InvestigateReadmeTexts(texts [][]byte, fs filer.Filer) map[string]float32 {
 // InvestigateReadmeText scans the README file for licensing information and outputs probable
 // names found with Named Entity Recognition from NLP.
 func InvestigateReadmeText(text []byte, fs filer.Filer) map[string]float32 {
-	return globalLicenseDatabase.QueryReadmeText(string(text), fs)
+	return globalLicenseDatabase().QueryReadmeText(string(text), fs)
 }
 
 // IsLicenseDirectory indicates whether the directory is likely to contain licenses.
