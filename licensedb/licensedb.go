@@ -43,10 +43,17 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 	}
 	// Plan B: take the README, find the section about the license and apply NER
 	candidates = internal.ExtractReadmeFiles(fileNames, fs)
-	if len(candidates) == 0 {
-		return nil, ErrNoLicenseFound
+	if len(candidates) > 0 {
+		licenses = internal.InvestigateReadmeTexts(candidates, fs)
+		if len(licenses) > 0 {
+			return licenses, nil
+		}
 	}
-	licenses = internal.InvestigateReadmeTexts(candidates, fs)
+	// Plan C: look for licence texts in source code files with comments at header
+	candidates = internal.ExtractSourceFiles(fileNames, fs)
+	if len(candidates) > 0 {
+		licenses = internal.InvestigateHeaderComments(candidates, fs)
+	}
 	if len(licenses) == 0 {
 		return nil, ErrNoLicenseFound
 	}

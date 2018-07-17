@@ -10,6 +10,7 @@ import (
 
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/processors"
+	"gopkg.in/src-d/enry.v1"
 )
 
 var (
@@ -156,4 +157,58 @@ func InvestigateReadmeText(text []byte, fs filer.Filer) map[string]float32 {
 // IsLicenseDirectory indicates whether the directory is likely to contain licenses.
 func IsLicenseDirectory(fileName string) bool {
 	return licenseDirectoryRe.MatchString(strings.ToLower(fileName))
+}
+
+// ExtractSourceFiles searches for source code files and their returns header comments, when available.
+// Enry is used to get possible valuable files.
+func ExtractSourceFiles(files []string, fs filer.Filer) [][]byte {
+	candidates := [][]byte{}
+	langs := []string{}
+	for _, file := range files {
+		lang, safe := enry.GetLanguageByExtension(file)
+		if safe == true {
+			langs = append(langs, lang)
+			text, err := fs.ReadFile(file)
+			if err == nil {
+				if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
+					text = preprocessor(text)
+				}
+				candidates = append(candidates, text)
+			}
+		}
+	}
+	if len(candidates) > 0 {
+		candidates = ExtractHeaderComments(candidates, langs)
+	}
+	return candidates
+}
+
+// ExtractHeaderComments searches in source code files for header comments and outputs license text on them them.
+func ExtractHeaderComments(candidates [][]byte, lang []string) [][]byte {
+	// TO DO: split code from comments, preferably only header comments
+	comments := [][]byte{}
+	return comments
+}
+
+// InvestigateHeaderComments scans the header comments for licensing information and outputs the
+// probable names using NER.
+func InvestigateHeaderComments(texts [][]byte, fs filer.Filer) map[string]float32 {
+	// TO DO: split license-comments from description-comments.
+	maxLicenses := map[string]float32{}
+	for _, text := range texts {
+		candidates := InvestigateHeaderComment(text)
+		for name, sim := range candidates {
+			maxSim := maxLicenses[name]
+			if sim > maxSim {
+				maxLicenses[name] = sim
+			}
+		}
+	}
+	return maxLicenses
+}
+
+// InvestigateHeaderComment scans the header comments for licensing information and outputs probable
+// names found with Named Entity Recognition from NLP.
+func InvestigateHeaderComment(text []byte) map[string]float32 {
+	return globalLicenseDatabase().QueryLicenseText(string(text))
 }
