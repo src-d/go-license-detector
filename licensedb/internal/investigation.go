@@ -165,7 +165,7 @@ func ExtractSourceFiles(files []string, fs filer.Filer) [][]byte {
 	candidates := [][]byte{}
 	langs := []string{}
 	for _, file := range files {
-		lang, safe := enry.GetLanguageByExtension(file)
+		lang, safe := enry.GetLanguage(file)
 		if safe == true {
 			langs = append(langs, lang)
 			text, err := fs.ReadFile(file)
