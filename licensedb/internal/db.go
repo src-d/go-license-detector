@@ -460,3 +460,9 @@ func tfidf(freq int, docfreq int, ndocs int) float32 {
 	}
 	return weight
 }
+
+func func (db *database) QuerySourceFile(text string) map[string]float32 {
+	// TO DO: implement this function
+	placeholder := map[string]float32{}
+	return
+}
