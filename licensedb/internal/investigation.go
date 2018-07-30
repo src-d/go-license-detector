@@ -64,7 +64,7 @@ var (
 	licenseDirectoryRe = regexp.MustCompile(fmt.Sprintf(
 		"^(%s)$", strings.Join(licenseFileNames, "|")))
 
-	commentSyntaxes = map[string]*regexp.Regexp {
+	commentSyntaxesRe = map[string]*regexp.Regexp {
 		"ANTLR": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
 		"C": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
 		"C++": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
@@ -220,7 +220,7 @@ func ExtractHeaderComments(candidates [][]byte, langs []string) [][]byte {
 		if len(candidateHeader) > 1024 {
 			candidateHeader = candidate[:1024]
 		}
-		if reg, exists := commentSyntaxes[candidateLang]; exists {
+		if reg, exists := commentSyntaxesRe[candidateLang]; exists {
 			if match := reg.FindAllString(string(candidateHeader), -1); match != nil {
 				var matchText string
 				for _, m := range match {
