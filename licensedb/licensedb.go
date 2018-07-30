@@ -50,7 +50,9 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 		}
 	}
 	// Plan C: look for licence texts in source code files with comments at header
-	candidates = internal.ExtractSourceFiles(fileNames, fs)
+	var extendedFileNames []string
+	extendedFileNames = extractAllSubfiles(fs, extendedFileNames, "")
+	candidates = internal.ExtractSourceFiles(extendedFileNames, fs)
 	if len(candidates) > 0 {
 		licenses = internal.InvestigateHeaderComments(candidates, fs)
 	}
@@ -58,4 +60,19 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 		return nil, ErrNoLicenseFound
 	}
 	return licenses, nil
+}
+
+func extractAllSubfiles(fs filer.Filer, fileNames []string, path string) []string {
+	files, err := fs.ReadDir(path)
+	if err == nil {
+		for _, subfile := range files {
+			currentPath := paths.Join(path, subfile.Name)
+			if subfile.IsDir {
+				fileNames = extractAllSubfiles(fs, fileNames, currentPath)
+			} else {
+				fileNames = append(fileNames, currentPath)
+			}
+		}
+	}
+	return fileNames
 }

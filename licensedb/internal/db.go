@@ -462,7 +462,23 @@ func tfidf(freq int, docfreq int, ndocs int) float32 {
 }
 
 func (db *database) QuerySourceFile(text string) map[string]float32 {
-	// TO DO: implement this function
-	placeholder := map[string]float32{}
-	return
+	candidates := map[string]float32{}
+	append := func(others map[string]float32) {
+		for key, val := range others {
+			if candidates[key] < val {
+				candidates[key] = val
+			}
+		}
+	}
+	append(db.QueryLicenseText(string(text)))
+	if len(candidates) == 0 {
+		// TO DO: split license-comments from description-comments.
+	}
+	if db.debug {
+		for key, val := range candidates {
+			println("NLP", key, val)
+		}
+	}
+	db.addURLMatches(candidates, text)
+	return candidates
 }
