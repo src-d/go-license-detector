@@ -471,9 +471,12 @@ func (db *database) QuerySourceFile(text string) map[string]float32 {
 		}
 	}
 	append(db.QueryLicenseText(string(text)))
-	if len(candidates) == 0 {
-		// TO DO: split license-comments from description-comments.
-	}
+	// if len(candidates) == 0 {
+	// 	append(investigateSourceFile(text, db.nameSubstrings, db.nameSubstringSizes))
+	// 	if len(candidates) == 0 {
+	// 		append(investigateSourceFile(text, db.nameShortSubstrings, db.nameShortSubstringSizes))
+	// 	}
+	// }
 	if db.debug {
 		for key, val := range candidates {
 			println("NLP", key, val)
