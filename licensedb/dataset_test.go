@@ -23,7 +23,7 @@ func TestDataset(t *testing.T) {
 	for _, project := range projects {
 		go func(project filer.File) {
 			defer wg.Done()
-			myLicenses, _ := Detect(filer.NestFiler(rootFiler, project.Name))
+			myLicenses, _, _ := Detect(filer.NestFiler(rootFiler, project.Name))
 			if len(myLicenses) > 0 {
 				mutex.Lock()
 				licenses[project.Name] = myLicenses
