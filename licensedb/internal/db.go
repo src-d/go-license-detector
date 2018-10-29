@@ -460,3 +460,28 @@ func tfidf(freq int, docfreq int, ndocs int) float32 {
 	}
 	return weight
 }
+
+func (db *database) QuerySourceFile(text string) map[string]float32 {
+	candidates := map[string]float32{}
+	append := func(others map[string]float32) {
+		for key, val := range others {
+			if candidates[key] < val {
+				candidates[key] = val
+			}
+		}
+	}
+	append(db.QueryLicenseText(string(text)))
+	// if len(candidates) == 0 {
+	// 	append(investigateSourceFile(text, db.nameSubstrings, db.nameSubstringSizes))
+	// 	if len(candidates) == 0 {
+	// 		append(investigateSourceFile(text, db.nameShortSubstrings, db.nameShortSubstringSizes))
+	// 	}
+	// }
+	if db.debug {
+		for key, val := range candidates {
+			println("NLP", key, val)
+		}
+	}
+	db.addURLMatches(candidates, text)
+	return candidates
+}

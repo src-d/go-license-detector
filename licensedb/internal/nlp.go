@@ -143,3 +143,14 @@ func splitLicenseName(name string) []substring {
 	})
 	return result
 }
+
+func investigateSourceFile(
+	text string, licenseNameParts map[string][]substring,
+	licenseNameSizes map[string]int) map[string]float32 {
+	// TO DO: split license-comments from description-comments
+			// =====
+			// ----
+			// \n\n\n
+			// import
+	return map[string]float32{}
+	}

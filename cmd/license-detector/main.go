@@ -103,7 +103,7 @@ func process(arg string) ([]match, error) {
 		return nil, err
 	}
 
-	ls, err := licensedb.Detect(resolvedFiler)
+	ls, _, err := licensedb.Detect(resolvedFiler)
 	if err != nil {
 		return nil, err
 	}

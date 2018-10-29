@@ -10,6 +10,7 @@ import (
 
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/processors"
+	"gopkg.in/src-d/enry.v1"
 )
 
 var (
@@ -62,6 +63,36 @@ var (
 
 	licenseDirectoryRe = regexp.MustCompile(fmt.Sprintf(
 		"^(%s)$", strings.Join(licenseFileNames, "|")))
+
+	commentSyntaxesRe = map[string]*regexp.Regexp {
+		"ANTLR": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"C": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"C++": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"C#": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"CSS": regexp.MustCompile(`\/\*(.*?\t?\r?\n?)+?\*\/`),
+		"Go": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"HTML": regexp.MustCompile(`<\!--(.*?\t?\r?\n?)+?-->`),
+		"Haskel": regexp.MustCompile(`(-{2}.*\t?\r?\n?)|(\{-(.*?\t?\r?\n?)+?\-\})`),
+		"Java": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"JavaScript": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"Matlab": regexp.MustCompile(`(%.*\t?\r?\n?)|(%\{(.?\t?\r?\n?)+?%\})`),
+		"Objective-C": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"Perl": regexp.MustCompile(`(#.*\t?\r?\n?)|(=begin(.*?\t?\r?\n?)+?=cut)`),
+		"PHP": regexp.MustCompile(`(#.*\t?\r?\n?)|(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"Python": regexp.MustCompile("('''(.?\t?\r?\n?)+?''')|(#.*\t?\r?\n?)|(\"\"\"(.?\t?\r?\n?)+?\"\"\")"),
+		"Ruby": regexp.MustCompile(`(#.*\t?\r?\n?)|(=begin(.*?\t?\r?\n?)+?=end)`),
+		"Rust": regexp.MustCompile(`\/\*(.*?\t?\r?\n?)+?\*\/`),
+		"R": regexp.MustCompile(`#.*\t?\r?\n?`),
+		"Shell": regexp.MustCompile(`#.*\t?\r?\n?`),
+		"Swift": regexp.MustCompile(`(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"SAS": regexp.MustCompile(`(\*(.*?\t?\r?\n?)+?;)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"Scala": regexp.MustCompile(`(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"SQL": regexp.MustCompile(`(-{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"TypeScript": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
+		"YAML": regexp.MustCompile(`#.*\t?\r?\n?`),
+	}
+
+	cleanCommentsRe = regexp.MustCompile(`#|\*|\/|=begin|=cut|=end`)
 )
 
 // ExtractLicenseFiles returns the list of possible license texts.
@@ -156,4 +187,87 @@ func InvestigateReadmeText(text []byte, fs filer.Filer) map[string]float32 {
 // IsLicenseDirectory indicates whether the directory is likely to contain licenses.
 func IsLicenseDirectory(fileName string) bool {
 	return licenseDirectoryRe.MatchString(strings.ToLower(fileName))
+}
+
+// ExtractSourceFiles searches for source code files and their returns header comments, when available.
+// Enry is used to get possible valuable files.
+func ExtractSourceFiles(files []string, fs filer.Filer) ([][]byte, []string) {
+	candidates := [][]byte{}
+	fileNames := []string{}
+	langs := []string{}
+	commentsFileName := []string{}
+	for _, file := range files {
+		text, err := fs.ReadFile(file)
+		if err == nil {
+			lang := enry.GetLanguage(file, text)
+			langs = append(langs, lang)
+			candidates = append(candidates, text)
+			fileNames = append(fileNames, file)
+		}
+	}
+	if len(candidates) > 0 {
+		candidates, commentsFileName = ExtractHeaderComments(candidates, langs, fileNames)
+	}
+	return candidates, commentsFileName
+}
+
+// ExtractHeaderComments searches in source code files for header comments and outputs license text on them them.
+func ExtractHeaderComments(candidates [][]byte, langs []string, fileNames []string) ([][]byte, []string) {
+	comments := [][]byte{}
+	commentsFileName := []string{}
+	var unsupportedTypes string
+	for i, candidate := range candidates {
+		candidateLang := langs[i]
+		if reg, exists := commentSyntaxesRe[candidateLang]; exists {
+			candidateHeader := candidate
+			if len(candidateHeader) > 1024 {
+				candidateHeader = candidate[:1024]
+			}
+			if match := reg.FindAllString(string(candidateHeader), -1); match != nil {
+				commentsFileName = append(commentsFileName, fileNames[i])
+				var matchText string
+				for _, m := range match {
+					matchText += cleanCommentsRe.ReplaceAllString(m, "")
+				}
+				comments = append(comments, []byte(matchText))
+			}
+		} else {
+			match, _ := regexp.Match(candidateLang, []byte(unsupportedTypes))
+			if match == false {
+				unsupportedTypes += candidateLang + ", "
+			}
+		}
+	}
+	if len(unsupportedTypes) > 0 {
+		unsupportedTypes = unsupportedTypes[:len(unsupportedTypes)-2]
+		fmt.Println("The following file types were not investigated for licenses on the comments:", unsupportedTypes + ". ")
+	}
+	return comments, commentsFileName
+}
+
+// InvestigateHeaderComments scans the header comments for licensing information and outputs the
+// probable names using NER.
+func InvestigateHeaderComments(texts [][]byte, fs filer.Filer, commentsFileName []string) (map[string]float32, []string) {
+	maxLicenses := map[string]float32{}
+	licensesFileNames := []string{}
+	// TO DO: output max license per file, not files with licenses + licenses found
+	for i, text := range texts {
+		candidates := InvestigateHeaderComment(text)
+		if len(candidates) > 0 {
+			licensesFileNames = append(licensesFileNames, commentsFileName[i])
+			for name, sim := range candidates {
+				maxSim := maxLicenses[name]
+				if sim > maxSim {
+					maxLicenses[name] = sim
+				}
+			}
+		}
+	}
+	return maxLicenses, licensesFileNames
+}
+
+// InvestigateHeaderComment scans the header comments for licensing information and outputs probable
+// names found with Named Entity Recognition from NLP.
+func InvestigateHeaderComment(text []byte) map[string]float32 {
+	return globalLicenseDatabase().QuerySourceFile(string(text))
 }
