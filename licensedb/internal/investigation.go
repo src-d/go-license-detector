@@ -91,6 +91,8 @@ var (
 		"TypeScript": regexp.MustCompile(`(\/{2}.*\t?\r?\n?)|(\/\*(.*?\t?\r?\n?)+?\*\/)`),
 		"YAML": regexp.MustCompile(`#.*\t?\r?\n?`),
 	}
+
+	cleanCommentsRe = regexp.MustCompile(`#|\*|\/|=begin|=cut|=end`)
 )
 
 // ExtractLicenseFiles returns the list of possible license texts.
@@ -189,42 +191,43 @@ func IsLicenseDirectory(fileName string) bool {
 
 // ExtractSourceFiles searches for source code files and their returns header comments, when available.
 // Enry is used to get possible valuable files.
-func ExtractSourceFiles(files []string, fs filer.Filer) [][]byte {
+func ExtractSourceFiles(files []string, fs filer.Filer) ([][]byte, []string) {
 	candidates := [][]byte{}
+	fileNames := []string{}
 	langs := []string{}
-	var empty []byte
+	commentsFileName := []string{}
 	for _, file := range files {
 		text, err := fs.ReadFile(file)
 		if err == nil {
-			lang := enry.GetLanguage(file, empty)
+			lang := enry.GetLanguage(file, text)
 			langs = append(langs, lang)
-			if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
-				text = preprocessor(text)
-			}
 			candidates = append(candidates, text)
+			fileNames = append(fileNames, file)
 		}
 	}
 	if len(candidates) > 0 {
-		candidates = ExtractHeaderComments(candidates, langs)
+		candidates, commentsFileName = ExtractHeaderComments(candidates, langs, fileNames)
 	}
-	return candidates
+	return candidates, commentsFileName
 }
 
 // ExtractHeaderComments searches in source code files for header comments and outputs license text on them them.
-func ExtractHeaderComments(candidates [][]byte, langs []string) [][]byte {
+func ExtractHeaderComments(candidates [][]byte, langs []string, fileNames []string) ([][]byte, []string) {
 	comments := [][]byte{}
+	commentsFileName := []string{}
 	var unsupportedTypes string
 	for i, candidate := range candidates {
 		candidateLang := langs[i]
-		candidateHeader := candidate
-		if len(candidateHeader) > 1024 {
-			candidateHeader = candidate[:1024]
-		}
 		if reg, exists := commentSyntaxesRe[candidateLang]; exists {
+			candidateHeader := candidate
+			if len(candidateHeader) > 1024 {
+				candidateHeader = candidate[:1024]
+			}
 			if match := reg.FindAllString(string(candidateHeader), -1); match != nil {
+				commentsFileName = append(commentsFileName, fileNames[i])
 				var matchText string
 				for _, m := range match {
-					matchText += m
+					matchText += cleanCommentsRe.ReplaceAllString(m, "")
 				}
 				comments = append(comments, []byte(matchText))
 			}
@@ -239,23 +242,28 @@ func ExtractHeaderComments(candidates [][]byte, langs []string) [][]byte {
 		unsupportedTypes = unsupportedTypes[:len(unsupportedTypes)-2]
 		fmt.Println("The following file types were not investigated for licenses on the comments:", unsupportedTypes + ". ")
 	}
-	return comments
+	return comments, commentsFileName
 }
 
 // InvestigateHeaderComments scans the header comments for licensing information and outputs the
 // probable names using NER.
-func InvestigateHeaderComments(texts [][]byte, fs filer.Filer) map[string]float32 {
+func InvestigateHeaderComments(texts [][]byte, fs filer.Filer, commentsFileName []string) (map[string]float32, []string) {
 	maxLicenses := map[string]float32{}
-	for _, text := range texts {
+	licensesFileNames := []string{}
+	// TO DO: output max license per file, not files with licenses + licenses found
+	for i, text := range texts {
 		candidates := InvestigateHeaderComment(text)
-		for name, sim := range candidates {
-			maxSim := maxLicenses[name]
-			if sim > maxSim {
-				maxLicenses[name] = sim
+		if len(candidates) > 0 {
+			licensesFileNames = append(licensesFileNames, commentsFileName[i])
+			for name, sim := range candidates {
+				maxSim := maxLicenses[name]
+				if sim > maxSim {
+					maxLicenses[name] = sim
+				}
 			}
 		}
 	}
-	return maxLicenses
+	return maxLicenses, licensesFileNames
 }
 
 // InvestigateHeaderComment scans the header comments for licensing information and outputs probable

@@ -15,10 +15,10 @@ var (
 
 // Detect returns the most probable reference licenses matched for the given
 // file tree. Each match has the confidence assigned, from 0 to 1, 1 means 100% confident.
-func Detect(fs filer.Filer) (map[string]float32, error) {
+func Detect(fs filer.Filer) (map[string]float32, []string, error) {
 	files, err := fs.ReadDir("")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	fileNames := []string{}
 	for _, file := range files {
@@ -39,27 +39,30 @@ func Detect(fs filer.Filer) (map[string]float32, error) {
 	candidates := internal.ExtractLicenseFiles(fileNames, fs)
 	licenses := internal.InvestigateLicenseTexts(candidates)
 	if len(licenses) > 0 {
-		return licenses, nil
+		return licenses, nil, nil
 	}
 	// Plan B: take the README, find the section about the license and apply NER
 	candidates = internal.ExtractReadmeFiles(fileNames, fs)
 	if len(candidates) > 0 {
 		licenses = internal.InvestigateReadmeTexts(candidates, fs)
 		if len(licenses) > 0 {
-			return licenses, nil
+			return licenses, nil, nil
 		}
 	}
+
 	// Plan C: look for licence texts in source code files with comments at header
-	var extendedFileNames []string
+	extendedFileNames := []string{}
+	commentsFileName := []string{}
+	licensesFileNames := []string{}
 	extendedFileNames = extractAllSubfiles(fs, extendedFileNames, "")
-	candidates = internal.ExtractSourceFiles(extendedFileNames, fs)
+	candidates, commentsFileName = internal.ExtractSourceFiles(extendedFileNames, fs)
 	if len(candidates) > 0 {
-		licenses = internal.InvestigateHeaderComments(candidates, fs)
+		licenses, licensesFileNames = internal.InvestigateHeaderComments(candidates, fs, commentsFileName)
 	}
 	if len(licenses) == 0 {
-		return nil, ErrNoLicenseFound
+		return nil, nil, ErrNoLicenseFound
 	}
-	return licenses, nil
+	return licenses, licensesFileNames, nil
 }
 
 func extractAllSubfiles(fs filer.Filer, fileNames []string, path string) []string {
