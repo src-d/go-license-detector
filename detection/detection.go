@@ -31,9 +31,9 @@ func Detect(args ...string) []Result {
 	return results
 }
 
+// Result gathers license detection results for a project path
 // json cannot not marshal error-s as we would expect (we always get "{}")
 // so we have to include ErrStr which is Err.Error()
-// Result gathers license detection results for a project path
 type Result struct {
 	Arg     string  `json:"project,omitempty"`
 	Matches []Match `json:"matches,omitempty"`
