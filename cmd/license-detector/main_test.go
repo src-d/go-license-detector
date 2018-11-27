@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/src-d/go-license-detector.v2/detection"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb"
 )
 
 func TestMain(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	detect([]string{"../..", "."}, "json", buffer)
-	var r []detection.Result
+	var r []licensedb.Result
 	json.Unmarshal(buffer.Bytes(), &r)
 	assert.Len(t, r, 2)
 	assert.Equal(t, "../..", r[0].Arg)

@@ -1,16 +1,16 @@
-package detection
+package licensedb
 
 import (
-	"sync"
-	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
-	"os"
 	"net/url"
-	"gopkg.in/src-d/go-license-detector.v2/licensedb"
+	"os"
 	"sort"
+	"sync"
+
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 )
 
-// Detect runs license analysis on each item in `args`
-func Detect(args ...string) []Result {
+// Analyse runs license analysis on each item in `args`
+func Analyse(args ...string) []Result {
 	nargs := len(args)
 	results := make([]Result, nargs)
 	var wg sync.WaitGroup
@@ -41,7 +41,7 @@ type Result struct {
 	ErrStr  string  `json:"error,omitempty"`
 }
 
-// Match describes the level of confidence for the detected Licence
+// Match describes the level of confidence for the detected License
 type Match struct {
 	License    string  `json:"license"`
 	Confidence float32 `json:"confidence"`
@@ -63,7 +63,7 @@ func process(arg string) ([]Match, error) {
 		return nil, err
 	}
 
-	ls, err := licensedb.Detect(resolvedFiler)
+	ls, err := Detect(resolvedFiler)
 	if err != nil {
 		return nil, err
 	}

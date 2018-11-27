@@ -9,8 +9,9 @@ import (
 	"io"
 	"log"
 	"os"
+
 	"github.com/spf13/pflag"
-	"gopkg.in/src-d/go-license-detector.v2/detection"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb"
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 // detect runs license analysis on each item in `args`` and outputs
 // the results in the specified `format` to `writer`.
 func detect(args []string, format string, writer io.Writer) {
-	results := detection.Detect(args...)
+	results := licensedb.Analyse(args...)
 
 	switch format {
 	case "text":
