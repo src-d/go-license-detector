@@ -19,7 +19,7 @@ func Analyse(args ...string) []Result {
 		go func(i int, arg string) {
 			defer wg.Done()
 			matches, err := process(arg)
-			res := Result{Arg: arg, Matches: matches, Err: err, ErrStr: ""}
+			res := Result{Arg: arg, Matches: matches}
 			if err != nil {
 				res.ErrStr = err.Error()
 			}
@@ -32,13 +32,10 @@ func Analyse(args ...string) []Result {
 }
 
 // Result gathers license detection results for a project path
-// json cannot not marshal error-s as we would expect (we always get "{}")
-// so we have to include ErrStr which is Err.Error()
 type Result struct {
 	Arg     string  `json:"project,omitempty"`
 	Matches []Match `json:"matches,omitempty"`
-	Err     error   `json:"-"`
-	ErrStr  string  `json:"error,omitempty"`
+	ErrStr     string  `json:"error,omitempty"`
 }
 
 // Match describes the level of confidence for the detected License

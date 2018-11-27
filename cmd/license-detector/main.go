@@ -37,8 +37,8 @@ func detect(args []string, format string, writer io.Writer) {
 	case "text":
 		for _, res := range results {
 			fmt.Fprintln(writer, res.Arg)
-			if res.Err != nil {
-				fmt.Fprintf(writer, "\t%v\n", res.Err)
+			if res.ErrStr != "" {
+				fmt.Fprintf(writer, "\t%v\n", res.ErrStr)
 				continue
 			}
 			for _, m := range res.Matches {

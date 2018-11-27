@@ -9,7 +9,7 @@ import (
 	"gopkg.in/src-d/go-license-detector.v2/licensedb"
 )
 
-func TestMain(t *testing.T) {
+func TestCmdMain(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	detect([]string{"../..", "."}, "json", buffer)
 	var r []licensedb.Result
@@ -19,9 +19,7 @@ func TestMain(t *testing.T) {
 	assert.Equal(t, ".", r[1].Arg)
 	assert.Len(t, r[0].Matches, 2)
 	assert.Len(t, r[1].Matches, 0)
-	assert.Nil(t, r[0].Err)
 	assert.Equal(t, "", r[0].ErrStr)
-	assert.Nil(t, r[1].Err) // json discards
 	assert.Equal(t, "no license file was found", r[1].ErrStr)
 	assert.Equal(t, "Apache-2.0", r[0].Matches[0].License)
 	assert.InDelta(t, 0.9846, r[0].Matches[0].Confidence, 0.001)
