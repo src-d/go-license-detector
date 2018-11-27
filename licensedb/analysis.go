@@ -35,7 +35,7 @@ func Analyse(args ...string) []Result {
 type Result struct {
 	Arg     string  `json:"project,omitempty"`
 	Matches []Match `json:"matches,omitempty"`
-	ErrStr     string  `json:"error,omitempty"`
+	ErrStr  string  `json:"error,omitempty"`
 }
 
 // Match describes the level of confidence for the detected License
