@@ -35,7 +35,7 @@ issue you're facing, or it's a known issue that we're already aware of.
 Pull Requests (PRs) are the main and exclusive way to contribute to the official go-license-detector project.
 In order for a PR to be accepted it needs to pass a list of requirements:
 
-- All PRs must be written in idiomatic Go, formatted according to [gofmt](https://golang.org/cmd/gofmt/), and without any warnings from [go lint](https://github.com/golang/lint) nor [go vet](https://golang.org/cmd/vet/).
+- All PRs must be written in idiomatic Go, formatted according to [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports), and without any warnings from [go lint](https://github.com/golang/lint) nor [go vet](https://golang.org/cmd/vet/).
 - New features should be generally covered with tests.
 - The test suite must pass.
 - All PRs have to pass the personal evaluation of at least one of the [maintainers](MAINTAINERS.md).

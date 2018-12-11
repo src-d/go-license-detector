@@ -61,7 +61,7 @@ license-detector /path/to/project
 license-detector https://github.com/src-d/go-git
 ```
 
-Library:
+Library (for a single license detection):
 
 ```go
 import (
@@ -73,6 +73,27 @@ func main() {
 	licenses, err := licensedb.Detect(filer.FromDirectory("/path/to/project"))
 }
 ```
+
+Library (for a convenient data structure that can be formatted as JSON):
+
+```go
+import (
+	"encoding/json"
+	"fmt"
+
+	"gopkg.in/src-d/go-license-detector.v2/licensedb"
+)
+
+func main() {
+	results := licensedb.Analyse("/path/to/project1", "/path/to/project2")
+	bytes, err := json.MarshalIndent(results, "", "\t")
+	if err != nil {
+		fmt.Printf("could not encode result to JSON: %v\n", err)
+	}
+	fmt.Println(string(bytes))
+}
+```
+
 
 ## Quality
 
