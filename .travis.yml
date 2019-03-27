@@ -17,7 +17,7 @@ before_install:
 install:
   - export GO111MODULE=on
   - go mod vendor
-  - go build -v ./...
+  - go build -v gopkg.in/src-d/go-license-detector.v2/cmd/license-detector
 
 script:
   - go vet ./...
