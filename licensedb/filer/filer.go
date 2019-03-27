@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	xpath "path"
 	"path/filepath"
 	"strings"
 
@@ -36,6 +37,9 @@ type Filer interface {
 	ReadDir(path string) ([]File, error)
 	// Close frees all the resources allocated by this Filer.
 	Close()
+	// PathsAreAlwaysSlash indicates whether the path separator is platform-independent ("/") or
+	// OS-specific.
+	PathsAreAlwaysSlash() bool
 }
 
 type localFiler struct {
@@ -98,6 +102,10 @@ func (filer *localFiler) ReadDir(path string) ([]File, error) {
 }
 
 func (filer *localFiler) Close() {}
+
+func (filer *localFiler) PathsAreAlwaysSlash() bool {
+	return false
+}
 
 type gitFiler struct {
 	root *object.Tree
@@ -199,6 +207,10 @@ func (filer *gitFiler) Close() {
 	filer.root = nil
 }
 
+func (filer *gitFiler) PathsAreAlwaysSlash() bool {
+	return true
+}
+
 // FromSiva returns a Filer that allows accessing all the files in a Git repository contained in a Siva file.
 // See https://github.com/src-d/go-siva and https://github.com/src-d/go-billy-siva
 func FromSiva(path string) (Filer, error) {
@@ -222,13 +234,16 @@ func FromSiva(path string) (Filer, error) {
 		return nil, errors.Wrapf(err, "unable to list Git references from Siva file %s", path)
 	}
 	var head plumbing.ReferenceName
-	refs.ForEach(func(ref *plumbing.Reference) error {
+	err = refs.ForEach(func(ref *plumbing.Reference) error {
 		if strings.HasPrefix(ref.Name().String(), "refs/heads/HEAD/") {
 			head = ref.Name()
 			return storer.ErrStop
 		}
 		return nil
 	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to iterate over references in Siva file %s", path)
+	}
 	return fromGit(repo, head)
 }
 
@@ -269,7 +284,7 @@ func FromZIP(path string) (Filer, error) {
 }
 
 func (filer *zipFiler) ReadFile(path string) ([]byte, error) {
-	parts := strings.Split(path, string(filepath.Separator))
+	parts := strings.Split(path, string("/"))
 	node := filer.tree
 	for _, part := range parts {
 		if part == "" {
@@ -293,7 +308,7 @@ func (filer *zipFiler) ReadFile(path string) ([]byte, error) {
 }
 
 func (filer *zipFiler) ReadDir(path string) ([]File, error) {
-	parts := strings.Split(path, string(filepath.Separator))
+	parts := strings.Split(path, string("/"))
 	node := filer.tree
 	for _, part := range parts {
 		if part == "" {
@@ -321,6 +336,10 @@ func (filer *zipFiler) Close() {
 	filer.arch.Close()
 }
 
+func (filer *zipFiler) PathsAreAlwaysSlash() bool {
+	return true
+}
+
 type nestedFiler struct {
 	origin Filer
 	offset string
@@ -332,13 +351,29 @@ func NestFiler(filer Filer, prefix string) Filer {
 }
 
 func (filer *nestedFiler) ReadFile(path string) ([]byte, error) {
-	return filer.origin.ReadFile(filepath.Join(filer.offset, path))
+	var fullPath string
+	if filer.origin.PathsAreAlwaysSlash() {
+		fullPath = xpath.Join(filer.offset, path)
+	} else {
+		fullPath = filepath.Join(filer.offset, path)
+	}
+	return filer.origin.ReadFile(fullPath)
 }
 
 func (filer *nestedFiler) ReadDir(path string) ([]File, error) {
-	return filer.origin.ReadDir(filepath.Join(filer.offset, path))
+	var fullPath string
+	if filer.origin.PathsAreAlwaysSlash() {
+		fullPath = xpath.Join(filer.offset, path)
+	} else {
+		fullPath = filepath.Join(filer.offset, path)
+	}
+	return filer.origin.ReadDir(fullPath)
 }
 
 func (filer *nestedFiler) Close() {
 	filer.origin.Close()
+}
+
+func (filer *nestedFiler) PathsAreAlwaysSlash() bool {
+	return filer.origin.PathsAreAlwaysSlash()
 }
