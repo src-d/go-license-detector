@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/hhatto/gorst"
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/russross/blackfriday/v2"
 )
 
 // Markdown converts Markdown to plain text. It tries to revert all the decorations.

@@ -4,21 +4,20 @@ language: go
 
 go_import_path: gopkg.in/src-d/go-license-detector.v2
 go:
-  - 1.9.x
-  - 1.10.x
-  - tip
+  - 1.11.x
+  - 1.12.x
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - go: tip
 
 before_install:
   - go get -v golang.org/x/lint/golint
   - go get -v github.com/haya14busa/goverage
 
 install:
-  - go get -v -t ./...
+  - export GO111MODULE=on
+  - go mod vendor
+  - go build -v ./...
 
 script:
   - go vet ./...
@@ -34,29 +33,29 @@ jobs:
   include:
     - stage: deploy
       os: osx
-      go: 1.10.x
+      go: 1.12.x
       after_success:
-        - gzip -S .darwin_amd64.gz $GOPATH/bin/license-detector
+        - gzip -S .darwin_amd64.gz license-detector
       script: skip
       deploy:
         provider: releases
         api_key:
           secure: $GITHUB_TOKEN
-        file: "$GOPATH/bin/license-detector.darwin_amd64.gz"
+        file: "license-detector.darwin_amd64.gz"
         skip_cleanup: true
         on:
           tags: true
     - stage: deploy
       os: linux
-      go: 1.10.x
+      go: 1.12.x
       script: skip
       after_success:
-        - gzip -S .linux_amd64.gz $GOPATH/bin/license-detector
+        - gzip -S .linux_amd64.gz license-detector
       deploy:
         provider: releases
         api_key:
           secure: $GITHUB_TOKEN
-        file: "$GOPATH/bin/license-detector.linux_amd64.gz"
+        file: "license-detector.linux_amd64.gz"
         skip_cleanup: true
         on:
           tags: true
