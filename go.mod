@@ -37,7 +37,7 @@ require (
 	gonum.org/v1/gonum v0.0.0-20180205154402-996b88e8f894
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/neurosnap/sentences.v1 v1.0.6 // indirect
-	gopkg.in/russross/blackfriday.v2 v2.0.0
+	gopkg.in/russross/blackfriday.v2 v2.0.1
 	gopkg.in/src-d/go-billy-siva.v4 v4.1.0
 	gopkg.in/src-d/go-billy.v4 v4.1.0
 	gopkg.in/src-d/go-git-fixtures.v3 v3.3.0 // indirect
