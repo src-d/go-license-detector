@@ -1,4 +1,4 @@
-# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/src-d/go-license-detector.v2?status.svg)](http://godoc.org/gopkg.in/src-d/go-license-detector.v2) [![Build Status](https://travis-ci.org/src-d/go-license-detector.svg?branch=master)](https://travis-ci.org/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
+# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/src-d/go-license-detector.v2?status.svg)](http://godoc.org/gopkg.in/src-d/go-license-detector.v2) [![Build Status](https://travis-ci.com/src-d/go-license-detector.svg?branch=master)](https://travis-ci.com/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
 
 Project license detector - a command line application and a library, written in Go.
 It scans the given directory for license files, normalizes and hashes them and outputs
@@ -18,7 +18,8 @@ The intended area of it's usage is data mining.
 ## Installation
 
 ```
-go get -v gopkg.in/src-d/go-license-detector.v2/...
+go mod vendor
+go build -v gopkg.in/src-d/go-license-detector.v2/cmd/license-detector
 ```
 
 ## Contributions
