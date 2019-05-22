@@ -18,7 +18,8 @@ The intended area of it's usage is data mining.
 ## Installation
 
 ```
-go mod vendor
+export GO111MODULE=on
+go mod download
 go build -v gopkg.in/src-d/go-license-detector.v2/cmd/license-detector
 ```
 
