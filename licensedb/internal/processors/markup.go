@@ -3,8 +3,8 @@ package processors
 import (
 	"bytes"
 
-	"github.com/hhatto/gorst"
-	"github.com/russross/blackfriday/v2"
+	rst "github.com/hhatto/gorst"
+	"gopkg.in/russross/blackfriday.v2"
 )
 
 // Markdown converts Markdown to plain text. It tries to revert all the decorations.
