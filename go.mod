@@ -21,7 +21,6 @@ require (
 	github.com/pelletier/go-buffruneio v0.2.0 // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/sergi/go-diff v0.0.0-20180205163309-da645544ed44
 	github.com/shogo82148/go-shuffle v0.0.0-20170808115208-59829097ff3b // indirect
 	github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95 // indirect
@@ -35,6 +34,7 @@ require (
 	golang.org/x/text v0.0.0-20180208041248-4e4a3210bb54
 	gonum.org/v1/gonum v0.0.0-20180205154402-996b88e8f894
 	gopkg.in/neurosnap/sentences.v1 v1.0.6 // indirect
+	gopkg.in/russross/blackfriday.v2 v2.0.1
 	gopkg.in/src-d/go-billy-siva.v4 v4.3.0
 	gopkg.in/src-d/go-billy.v4 v4.3.0
 	gopkg.in/src-d/go-git-fixtures.v3 v3.3.0 // indirect
@@ -42,3 +42,5 @@ require (
 	gopkg.in/src-d/go-siva.v1 v1.5.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+replace gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v2.0.1
