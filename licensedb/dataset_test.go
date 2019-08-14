@@ -6,8 +6,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/api"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDataset(t *testing.T) {
@@ -16,7 +18,7 @@ func TestDataset(t *testing.T) {
 	defer rootFiler.Close()
 	projects, err := rootFiler.ReadDir("")
 	assert.Nil(t, err)
-	licenses := map[string]map[string]float32{}
+	licenses := map[string]map[string]api.Match{}
 	mutex := sync.Mutex{}
 	wg := sync.WaitGroup{}
 	wg.Add(len(projects))
