@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/api"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal/processors"
 )
@@ -64,11 +65,30 @@ var (
 		"^(%s)$", strings.Join(licenseFileNames, "|")))
 )
 
+func investigateCandidates(candidates map[string][]byte, f func(text []byte) map[string]float32) map[string]api.Match {
+	matches := make(map[string]api.Match)
+	for file, text := range candidates {
+		candidates := f(text)
+		for name, sim := range candidates {
+			match := matches[name]
+			if match.Files == nil {
+				match.Files = make(map[string]float32)
+			}
+			match.Files[file] = sim
+			if sim > match.Confidence {
+				match.Confidence = sim
+			}
+			matches[name] = match
+		}
+	}
+	return matches
+}
+
 // ExtractLicenseFiles returns the list of possible license texts.
 // The file names are matched against the template.
 // Reader is used to to read file contents.
-func ExtractLicenseFiles(files []string, fs filer.Filer) [][]byte {
-	candidates := [][]byte{}
+func ExtractLicenseFiles(files []string, fs filer.Filer) map[string][]byte {
+	candidates := make(map[string][]byte)
 	for _, file := range files {
 		if licenseFileRe.MatchString(strings.ToLower(paths.Base(file))) {
 			text, err := fs.ReadFile(file)
@@ -84,7 +104,7 @@ func ExtractLicenseFiles(files []string, fs filer.Filer) [][]byte {
 				if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
 					text = preprocessor(text)
 				}
-				candidates = append(candidates, text)
+				candidates[file] = text
 			}
 		}
 	}
@@ -93,18 +113,9 @@ func ExtractLicenseFiles(files []string, fs filer.Filer) [][]byte {
 
 // InvestigateLicenseTexts takes the list of candidate license texts and returns the most probable
 // reference licenses matched. Each match has the confidence assigned, from 0 to 1, 1 means 100% confident.
-func InvestigateLicenseTexts(texts [][]byte) map[string]float32 {
-	maxLicenses := map[string]float32{}
-	for _, text := range texts {
-		candidates := InvestigateLicenseText(text)
-		for name, sim := range candidates {
-			maxSim := maxLicenses[name]
-			if sim > maxSim {
-				maxLicenses[name] = sim
-			}
-		}
-	}
-	return maxLicenses
+// Furthermore, each match contains a mapping of filename to the confidence that file produced.
+func InvestigateLicenseTexts(candidates map[string][]byte) map[string]api.Match {
+	return investigateCandidates(candidates, InvestigateLicenseText)
 }
 
 // InvestigateLicenseText takes the license text and returns the most probable reference licenses matched.
@@ -115,8 +126,8 @@ func InvestigateLicenseText(text []byte) map[string]float32 {
 
 // ExtractReadmeFiles searches for README files.
 // Reader is used to to read file contents.
-func ExtractReadmeFiles(files []string, fs filer.Filer) [][]byte {
-	candidates := [][]byte{}
+func ExtractReadmeFiles(files []string, fs filer.Filer) map[string][]byte {
+	candidates := make(map[string][]byte)
 	for _, file := range files {
 		if readmeFileRe.MatchString(strings.ToLower(file)) {
 			text, err := fs.ReadFile(file)
@@ -124,7 +135,7 @@ func ExtractReadmeFiles(files []string, fs filer.Filer) [][]byte {
 				if preprocessor, exists := filePreprocessors[paths.Ext(file)]; exists {
 					text = preprocessor(text)
 				}
-				candidates = append(candidates, text)
+				candidates[file] = text
 			}
 		}
 	}
@@ -133,18 +144,10 @@ func ExtractReadmeFiles(files []string, fs filer.Filer) [][]byte {
 
 // InvestigateReadmeTexts scans README files for licensing information and outputs the
 // probable names using NER.
-func InvestigateReadmeTexts(texts [][]byte, fs filer.Filer) map[string]float32 {
-	maxLicenses := map[string]float32{}
-	for _, text := range texts {
-		candidates := InvestigateReadmeText(text, fs)
-		for name, sim := range candidates {
-			maxSim := maxLicenses[name]
-			if sim > maxSim {
-				maxLicenses[name] = sim
-			}
-		}
-	}
-	return maxLicenses
+func InvestigateReadmeTexts(candidtes map[string][]byte, fs filer.Filer) map[string]api.Match {
+	return investigateCandidates(candidtes, func(text []byte) map[string]float32 {
+		return InvestigateReadmeText(text, fs)
+	})
 }
 
 // InvestigateReadmeText scans the README file for licensing information and outputs probable

@@ -4,6 +4,7 @@ import (
 	"errors"
 	paths "path"
 
+	"gopkg.in/src-d/go-license-detector.v2/licensedb/api"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
 	"gopkg.in/src-d/go-license-detector.v2/licensedb/internal"
 )
@@ -15,7 +16,7 @@ var (
 
 // Detect returns the most probable reference licenses matched for the given
 // file tree. Each match has the confidence assigned, from 0 to 1, 1 means 100% confident.
-func Detect(fs filer.Filer) (map[string]float32, error) {
+func Detect(fs filer.Filer) (map[string]api.Match, error) {
 	files, err := fs.ReadDir("")
 	if err != nil {
 		return nil, err
