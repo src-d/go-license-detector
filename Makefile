@@ -10,7 +10,6 @@ licensedb/internal/assets/bindata.go: licenses.tar urls.csv names.csv $(GOPATH)/
 licenses.tar: license-list-data.tar.gz
 	tar -xf license-list-data.tar.gz license-list-data-$(SPDX_DATA_VERSION)/text
 	tar -cf licenses.tar -C license-list-data-$(SPDX_DATA_VERSION)/text .
-	rm -rf license-list-data-$(SPDX_DATA_VERSION)
 
 license-list-data-$(SPDX_DATA_VERSION)/json/details: license-list-data.tar.gz
 	tar -xf license-list-data.tar.gz license-list-data-$(SPDX_DATA_VERSION)/json/details
