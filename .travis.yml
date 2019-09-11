@@ -6,6 +6,7 @@ go_import_path: gopkg.in/src-d/go-license-detector.v2
 go:
   - 1.11.x
   - 1.12.x
+  - 1.13.x
 
 matrix:
   fast_finish: true
