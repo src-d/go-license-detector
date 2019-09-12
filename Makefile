@@ -24,4 +24,4 @@ license-list-data.tar.gz:
 	curl -SLk -o license-list-data.tar.gz https://github.com/spdx/license-list-data/archive/v$(SPDX_DATA_VERSION).tar.gz
 
 $(GOPATH)/bin/go-bindata:
-	go get -v github.com/jteeuwen/go-bindata/...@6025e8de665b31fa74ab1a66f2cddd8c0abf887e
+	go get -v github.com/jteeuwen/go-bindata/go-bindata@6025e8de665b31fa74ab1a66f2cddd8c0abf887e
