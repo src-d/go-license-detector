@@ -6,6 +6,7 @@ go_import_path: gopkg.in/src-d/go-license-detector.v2
 go:
   - 1.11.x
   - 1.12.x
+  - 1.13.x
 
 matrix:
   fast_finish: true
@@ -16,6 +17,7 @@ before_install:
 
 install:
   - export GO111MODULE=on
+  - make
   - go mod vendor
   - go build -v gopkg.in/src-d/go-license-detector.v2/cmd/license-detector
 
@@ -33,7 +35,7 @@ jobs:
   include:
     - stage: deploy
       os: osx
-      go: 1.12.x
+      go: 1.13.x
       after_success:
         - gzip -S .darwin_amd64.gz license-detector
       script: skip
@@ -47,7 +49,7 @@ jobs:
           tags: true
     - stage: deploy
       os: linux
-      go: 1.12.x
+      go: 1.13.x
       script: skip
       after_success:
         - gzip -S .linux_amd64.gz license-detector
