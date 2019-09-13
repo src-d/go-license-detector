@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"gopkg.in/src-d/go-license-detector.v2/licensedb/api"
-	"gopkg.in/src-d/go-license-detector.v2/licensedb/filer"
+	"gopkg.in/src-d/go-license-detector.v3/licensedb/api"
+	"gopkg.in/src-d/go-license-detector.v3/licensedb/filer"
 
 	"github.com/stretchr/testify/assert"
 )

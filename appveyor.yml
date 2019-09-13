@@ -7,8 +7,8 @@ environment:
 
 build_script:
   - go mod vendor
-  - go build -v gopkg.in/src-d/go-license-detector.v2/cmd/license-detector
-  - go test gopkg.in/src-d/go-license-detector.v2/...
+  - go build -v gopkg.in/src-d/go-license-detector.v3/cmd/license-detector
+  - go test gopkg.in/src-d/go-license-detector.v3/...
   - 7z a license-detector.windows_amd64.zip license-detector.exe
 
 artifacts:
