@@ -1,4 +1,4 @@
-module gopkg.in/src-d/go-license-detector.v2
+module gopkg.in/src-d/go-license-detector.v3
 
 require (
 	github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7 // indirect
