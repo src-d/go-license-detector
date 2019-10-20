@@ -15,6 +15,7 @@ import (
 	"gopkg.in/src-d/go-billy.v4/osfs"
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/cache"
 	"gopkg.in/src-d/go-git.v4/plumbing/filemode"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
@@ -221,10 +222,7 @@ func FromSiva(path string) (Filer, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to create a Siva filesystem from %s", path)
 	}
-	sivaStorage, err := filesystem.NewStorage(fs)
-	if err != nil {
-		return nil, errors.Wrapf(err, "unable to create a new storage backend for Siva file %s", path)
-	}
+	sivaStorage := filesystem.NewStorage(fs, cache.NewObjectLRUDefault())
 	repo, err := git.Open(sivaStorage, tmpFs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to open the Git repository from Siva file %s", path)
