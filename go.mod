@@ -26,4 +26,7 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.13.1
 )
 
-replace gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v2.0.1
+replace (
+	github.com/sergi/go-diff v1.0.0 => github.com/sergi/go-diff v0.0.0-20180205163309-da645544ed44
+	gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v2.0.1
+)
