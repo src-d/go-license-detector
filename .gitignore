@@ -14,3 +14,6 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
+
+# Don't commit go.sum go modules file
+go.sum
