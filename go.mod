@@ -8,6 +8,7 @@ require (
 	github.com/dgryski/go-minhash v0.0.0-20170608043002-7fe510aff544 // indirect
 	github.com/dgryski/go-spooky v0.0.0-20170606183049-ed3d087f40e2 // indirect
 	github.com/ekzhu/minhash-lsh v0.0.0-20171225071031-5c06ee8586a1
+	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/gliderlabs/ssh v0.1.1 // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
@@ -38,7 +39,7 @@ require (
 	gopkg.in/src-d/go-billy-siva.v4 v4.3.0
 	gopkg.in/src-d/go-billy.v4 v4.3.0
 	gopkg.in/src-d/go-git-fixtures.v3 v3.3.0 // indirect
-	gopkg.in/src-d/go-git.v4 v4.1.0
+	gopkg.in/src-d/go-git.v4 v4.7.0
 	gopkg.in/src-d/go-siva.v1 v1.5.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
