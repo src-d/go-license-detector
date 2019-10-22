@@ -16,18 +16,19 @@ require (
 	github.com/spf13/pflag v1.0.0
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/exp v0.0.0-20171209012058-072991165226
-	golang.org/x/net v0.0.0-20190502183928-7f726cade0ab
-	golang.org/x/text v0.3.0
+	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
+	golang.org/x/text v0.3.2
 	gonum.org/v1/gonum v0.0.0-20180205154402-996b88e8f894
 	gopkg.in/neurosnap/sentences.v1 v1.0.6 // indirect
 	gopkg.in/russross/blackfriday.v2 v2.0.1
 	gopkg.in/src-d/go-billy-siva.v4 v4.3.0
-	gopkg.in/src-d/go-billy.v4 v4.3.0
-	gopkg.in/src-d/go-git.v4 v4.12.0
+	gopkg.in/src-d/go-billy.v4 v4.3.2
+	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/src-d/go-siva.v1 v1.5.0 // indirect
 )
 
 replace (
 	github.com/sergi/go-diff v1.0.0 => github.com/sergi/go-diff v0.0.0-20180205163309-da645544ed44
+	golang.org/x/text v0.3.2 => golang.org/x/text v0.3.0
 	gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v2.0.1
 )
