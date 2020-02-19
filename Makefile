@@ -1,5 +1,5 @@
 GOPATH ?= $(shell go env GOPATH)
-SPDX_DATA_VERSION ?= 3.0
+SPDX_DATA_VERSION ?= 3.8
 
 licensedb/internal/assets/bindata.go: licenses.tar urls.csv names.csv $(GOPATH)/bin/go-bindata
 	rm -rf license-list-data-$(SPDX_DATA_VERSION)
