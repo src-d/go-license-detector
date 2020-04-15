@@ -35,6 +35,7 @@ var (
 		"bsd",
 		"mit",
 		"apache",
+		"copying",
 	}
 
 	// License file extensions. Combined with the fileNames slice
