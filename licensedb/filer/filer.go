@@ -323,9 +323,13 @@ func (filer *zipFiler) ReadDir(path string) ([]File, error) {
 	}
 	result := make([]File, 0, len(node.children))
 	for name, child := range node.children {
+	    isDir := true
+	    if child.file != nil {
+	        isDir = child.file.FileInfo().IsDir()
+	    }
 		result = append(result, File{
 			Name:  name,
-			IsDir: child.file.FileInfo().IsDir(),
+			IsDir: isDir,
 		})
 	}
 	return result, nil
