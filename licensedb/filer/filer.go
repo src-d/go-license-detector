@@ -118,10 +118,11 @@ func FromGitURL(url string) (Filer, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not clone repo from %s", url)
 	}
-	return fromGit(repo, "")
+	return FromGit(repo, "")
 }
 
-func fromGit(repo *git.Repository, headRef plumbing.ReferenceName) (Filer, error) {
+// FromGit returns a Filer that allows accessing all the files in a Git repository
+func FromGit(repo *git.Repository, headRef plumbing.ReferenceName) (Filer, error) {
 	var head *plumbing.Reference
 	var err error
 	if headRef == "" {
@@ -242,7 +243,7 @@ func FromSiva(path string) (Filer, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to iterate over references in Siva file %s", path)
 	}
-	return fromGit(repo, head)
+	return FromGit(repo, head)
 }
 
 type zipNode struct {
