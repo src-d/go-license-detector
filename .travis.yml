@@ -2,7 +2,7 @@ dist: trusty
 
 language: go
 
-go_import_path: gopkg.in/src-d/go-license-detector.v3
+go_import_path: gopkg.in/snyk/go-license-detector.v3
 go:
   - 1.11.x
   - 1.12.x
@@ -19,13 +19,13 @@ install:
   - export GO111MODULE=on
   - make
   - go mod vendor
-  - go build -v gopkg.in/src-d/go-license-detector.v3/cmd/license-detector
+  - go build -v gopkg.in/snyk/go-license-detector.v3/cmd/license-detector
 
 script:
   - go vet ./...
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi
-  - goverage -coverprofile=coverage.txt -covermode=count gopkg.in/src-d/go-license-detector.v3/...
+  - goverage -coverprofile=coverage.txt -covermode=count gopkg.in/snyk/go-license-detector.v3/...
   - sed -i '/assets/d' coverage.txt
 
 after_success:

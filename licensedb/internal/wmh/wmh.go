@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
-	"gopkg.in/src-d/go-license-detector.v3/licensedb/internal/fastlog"
+	"gopkg.in/snyk/go-license-detector.v3/licensedb/internal/fastlog"
 )
 
 const maxUint16 = 65535

@@ -1,4 +1,4 @@
-module gopkg.in/src-d/go-license-detector.v3
+module gopkg.in/snyk/go-license-detector.v3
 
 require (
 	github.com/dgryski/go-metro v0.0.0-20180109044635-280f6062b5bc // indirect

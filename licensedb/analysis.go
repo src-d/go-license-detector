@@ -6,7 +6,7 @@ import (
 	"sort"
 	"sync"
 
-	"gopkg.in/src-d/go-license-detector.v3/licensedb/filer"
+	"gopkg.in/snyk/go-license-detector.v3/licensedb/filer"
 )
 
 // Analyse runs license analysis on each item in `args`

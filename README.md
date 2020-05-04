@@ -1,4 +1,4 @@
-# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/src-d/go-license-detector.v3?status.svg)](http://godoc.org/gopkg.in/src-d/go-license-detector.v3) [![Build Status](https://travis-ci.com/src-d/go-license-detector.svg?branch=master)](https://travis-ci.com/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
+# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/snyk/go-license-detector.v3?status.svg)](http://godoc.org/gopkg.in/snyk/go-license-detector.v3) [![Build Status](https://travis-ci.com/src-d/go-license-detector.svg?branch=master)](https://travis-ci.com/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
 
 Project license detector - a command line application and a library, written in Go.
 It scans the given directory for license files, normalizes and hashes them and outputs
@@ -20,7 +20,7 @@ The intended area of it's usage is data mining.
 ```
 export GO111MODULE=on
 go mod download
-go build -v gopkg.in/src-d/go-license-detector.v3/cmd/license-detector
+go build -v gopkg.in/snyk/go-license-detector.v3/cmd/license-detector
 ```
 
 ## Contributions
@@ -67,8 +67,8 @@ Library (for a single license detection):
 
 ```go
 import (
-    "gopkg.in/src-d/go-license-detector.v3/licensedb"
-    "gopkg.in/src-d/go-license-detector.v3/licensedb/filer"
+    "gopkg.in/snyk/go-license-detector.v3/licensedb"
+    "gopkg.in/snyk/go-license-detector.v3/licensedb/filer"
 )
 
 func main() {
@@ -83,7 +83,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/src-d/go-license-detector.v3/licensedb"
+	"gopkg.in/snyk/go-license-detector.v3/licensedb"
 )
 
 func main() {
@@ -115,7 +115,7 @@ Comparison to other projects on that dataset:
 |[LiD](https://source.codeaurora.org/external/qostg/lid)| 94%  (847/902) | 3660 |
 
 <details><summary>How this was measured</summary>
-<pre><code>$ cd $(go env GOPATH)/src/gopkg.in/src-d/go-license-detector.v3/licensedb
+<pre><code>$ cd $(go env GOPATH)/src/gopkg.in/snyk/go-license-detector.v3/licensedb
 $ mkdir dataset && cd dataset
 $ unzip ../dataset.zip
 $ # src-d/go-license-detector

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"gopkg.in/src-d/go-license-detector.v3/licensedb/api"
-	"gopkg.in/src-d/go-license-detector.v3/licensedb/filer"
-	"gopkg.in/src-d/go-license-detector.v3/licensedb/internal/processors"
+	"gopkg.in/snyk/go-license-detector.v3/licensedb/api"
+	"gopkg.in/snyk/go-license-detector.v3/licensedb/filer"
+	"gopkg.in/snyk/go-license-detector.v3/licensedb/internal/processors"
 )
 
 var (
