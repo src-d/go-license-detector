@@ -23,6 +23,7 @@ permissions granted by this license.`},
 		{"punctuation", "a-‒–—―⁓⸺⸻~˗‐‑⁃⁻₋−∼⎯⏤─➖𐆑֊﹘﹣－", "a-"},
 		{"bullet", "-\n*\n✱\n﹡\n•\n●\n⚫\n⏺\n🞄\n∙\n⋅\n", ""},
 		{"license", "", ""},
+		{"copyright notice", "copyright notice", "copyright notice"},
 	}
 
 	for _, tc := range tt {
