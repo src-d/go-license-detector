@@ -1,4 +1,6 @@
-# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/snyk/go-license-detector.v3?status.svg)](http://godoc.org/gopkg.in/snyk/go-license-detector.v3) [![Build Status](https://travis-ci.com/src-d/go-license-detector.svg?branch=master)](https://travis-ci.com/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
+# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/snyk/go-license-detector.v3?status.svg)](http://godoc.org/gopkg.in/snyk/go-license-detector.v3) [![Build Status](https://travis-ci.com/snyk/go-license-detector.svg?branch=master)](https://travis-ci.com/snyk/go-license-detector)
+
+*Note: Forked to make minor improvements quickly, since the original project is no longer frequently maintained. Used internally at Snyk.*
 
 Project license detector - a command line application and a library, written in Go.
 It scans the given directory for license files, normalizes and hashes them and outputs
