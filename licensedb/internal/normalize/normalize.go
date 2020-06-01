@@ -75,13 +75,13 @@ var (
 	)
 
 	// 9.1.1 "©", "(c)", or "Copyright" should be considered equivalent and interchangeable.
-	copyrightRe = regexp.MustCompile("copyright|\\(c\\)")
-	trademarkRe = regexp.MustCompile("trademark(s?)|\\(tm\\)")
+	copyrightRe = regexp.MustCompile("©|\\(c\\)")
+	trademarkRe = regexp.MustCompile("trademarks|\\(tm\\)|™")
 
 	// extra cleanup
 	brokenLinkRe    = regexp.MustCompile("http s ://")
 	urlCleanupRe    = regexp.MustCompile("[<(](http(s?)://[^\\s]+)[)>]")
-	copyrightLineRe = regexp.MustCompile("(?m)^((©.*)|(all rights reserved(\\.)?)|(li[cs]en[cs]e))\n")
+	copyrightLineRe = regexp.MustCompile("(?m)^((copyright.*)|(all rights reserved(\\.)?)|(li[cs]en[cs]e))\n")
 	nonAlphaNumRe   = regexp.MustCompile("[^- \\na-z0-9]")
 
 	// used in Split()
@@ -128,8 +128,8 @@ func LicenseText(text string, strictness Strictness) string {
 	text = wordReplacer.Replace(text)
 
 	// 9. Copyright Symbol
-	text = copyrightRe.ReplaceAllString(text, "©")
-	text = trademarkRe.ReplaceAllString(text, "™")
+	text = copyrightRe.ReplaceAllString(text, "copyright")
+	text = trademarkRe.ReplaceAllString(text, "trademark")
 
 	// fix broken URLs in SPDX source texts
 	text = brokenLinkRe.ReplaceAllString(text, "https://")
@@ -155,7 +155,9 @@ func LicenseText(text string, strictness Strictness) string {
 		// there are common mismatches because of trailing dots
 		text = strings.Replace(text, ".", "", -1)
 		// usually copyright lines are custom and occur multiple times
+		text = strings.Replace(text, "copyright notice", "PLACEHOLDER", -1)
 		text = copyrightLineRe.ReplaceAllString(text, "")
+		text = strings.Replace(text, "PLACEHOLDER", "copyright notice", -1)
 	}
 
 	if strictness > Moderate {
