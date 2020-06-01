@@ -79,9 +79,27 @@ func TestZipFiler(t *testing.T) {
 	filer, err := FromZIP("test_data/local.zip")
 	assert.Nil(t, err)
 	testFiler(t, filer)
+
 	filer, err = FromZIP("test_data/local2.zip")
 	assert.Nil(t, filer)
 	assert.NotNil(t, err)
+
+	filer, err = FromZIP("test_data/empty_sub_dir.zip")
+	assert.Nil(t, err)
+	defer filer.Close()
+	files, err := filer.ReadDir("")
+	assert.Nil(t, err)
+	assert.Len(t, files, 1)
+	assert.Equal(t, "dir", files[0].Name)
+	assert.True(t, files[0].IsDir)
+	files, err = filer.ReadDir("dir")
+	assert.Nil(t, err)
+	assert.Len(t, files, 1)
+	assert.Equal(t, "sub_dir", files[0].Name)
+	assert.True(t, files[0].IsDir)
+	files, err = filer.ReadDir("dir/sub_dir")
+	assert.Nil(t, err)
+	assert.Len(t, files, 0)
 }
 
 func TestNestedFiler(t *testing.T) {
