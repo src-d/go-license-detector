@@ -5,6 +5,10 @@ This repository is now archived.
 
 *Note: Forked to make minor improvements quickly, since the original project is no longer frequently maintained. Used internally at Snyk.*
 
+## WE CONTINUE THE DEVELOPMENT AT [go-enry/go-license-detector](https://github.com/go-enry/go-license-detector). This repository is abandoned, and no further updates will be done on the code base, nor issue/prs will be answered or attended.
+
+# go-license-detector [![GoDoc](https://godoc.org/gopkg.in/src-d/go-license-detector.v3?status.svg)](http://godoc.org/gopkg.in/src-d/go-license-detector.v3) [![Build Status](https://travis-ci.com/src-d/go-license-detector.svg?branch=master)](https://travis-ci.com/src-d/go-license-detector) [![Build status](https://ci.appveyor.com/api/projects/status/bxixhg99ewcgc5i5?svg=true)](https://ci.appveyor.com/project/vmarkovtsev/go-license-detector) [![codecov](https://codecov.io/github/src-d/go-license-detector/coverage.svg)](https://codecov.io/gh/src-d/go-license-detector) [![Go Report Card](https://goreportcard.com/badge/github.com/src-d/go-license-detector)](https://goreportcard.com/report/github.com/src-d/go-license-detector)
+
 Project license detector - a command line application and a library, written in Go.
 It scans the given directory for license files, normalizes and hashes them and outputs
 all the fuzzy matches with the list of reference texts.
