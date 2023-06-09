@@ -1,3 +1,6 @@
+# WARNING
+This repository is now archived.
+
 # go-license-detector [![GoDoc](https://godoc.org/gopkg.in/snyk/go-license-detector.v3?status.svg)](http://godoc.org/gopkg.in/snyk/go-license-detector.v3) [![Build Status](https://travis-ci.com/snyk/go-license-detector.svg?branch=master)](https://travis-ci.com/snyk/go-license-detector)
 
 *Note: Forked to make minor improvements quickly, since the original project is no longer frequently maintained. Used internally at Snyk.*
